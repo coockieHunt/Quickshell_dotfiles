@@ -1,0 +1,13 @@
+# Editor and operating-system files
+.DS_Store
+*~
+*.swp
+*.swo
+*.bak
+*.orig
+
+# Runtime logs
+*.log
+
+# Local generated configuration
+/config.json
