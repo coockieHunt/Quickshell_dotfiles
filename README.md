@@ -86,6 +86,70 @@ settings.
 The wallpaper picker reads images from `~/Pictures/wallpapers`. The scripts
 store the selected wallpaper and generated theme colors under `~/.cache`.
 
+## Sudo and TLP setup
+
+The power-profile controls use `sudo -n` (non-interactive sudo). The current
+[`scripts/power-profile.sh`](./scripts/power-profile.sh) runs
+`/usr/bin/tlp-stat -s` to display the active profile and switches profiles with
+`/usr/bin/tlp`. These exact commands must be allowed without a password.
+
+### Option 1: `tlpctl` (TLP 1.9+ with `tlp-pd`)
+
+If you use TLP 1.9 or newer with `tlp-pd` installed, profiles can be switched
+without root privileges:
+
+```bash
+tlpctl performance   # AC profile
+tlpctl balanced      # BAT profile
+tlpctl power-saver   # SAV profile
+```
+
+To use this option without a sudoers rule, update
+[`scripts/power-profile.sh`](./scripts/power-profile.sh) to use `tlpctl`
+instead of `sudo -n tlp` for profile changes. The script also calls
+`sudo -n /usr/bin/tlp-stat -s` to display the current profile; update that
+status check as well if you want to remove all sudo requirements.
+
+### Option 2: sudoers rule
+
+1. Check the paths of the TLP commands:
+
+   ```bash
+   command -v tlp
+   command -v tlp-stat
+   ```
+
+   The script currently uses `/usr/bin/tlp` and `/usr/bin/tlp-stat`. If your
+   commands are installed elsewhere, update the script paths as well.
+
+2. Create a dedicated sudoers file with `visudo` (never edit `/etc/sudoers`
+   directly):
+
+   ```bash
+   sudo visudo -f /etc/sudoers.d/tlp-quickshell
+   ```
+
+3. Add the following line, replacing `YOUR_USER` with your Linux username and
+   adjusting command paths if needed:
+
+   ```
+   YOUR_USER ALL=(root) NOPASSWD: /usr/bin/tlp performance, /usr/bin/tlp balanced, /usr/bin/tlp power-saver, /usr/bin/tlp-stat -s
+   ```
+
+   This allows only the profile commands and status query currently used by
+   the script. Avoid allowing `tlp` with arbitrary arguments.
+
+4. Check the syntax and test:
+
+   ```bash
+   sudo visudo -c
+   sudo -n /usr/bin/tlp balanced && echo OK
+   sudo -n /usr/bin/tlp-stat -s
+   ```
+
+> **Note:** Review the files in `scripts/` before enabling passwordless sudo,
+> and make sure the allowed commands match exactly what they run.
+
 ## Hardware and portability notes
 
 - GPU usage is read from AMD-style
@@ -108,3 +172,7 @@ store the selected wallpaper and generated theme colors under `~/.cache`.
 - `components/` — reusable UI elements.
 - `theme/Theme.qml` — loads the JSONC settings and generated wallpaper colors.
 - `scripts/` — wallpaper, TLP power-profile, and lock-screen helpers.
+
+## License
+
+This project is distributed under the [MIT License](./LICENSE).
