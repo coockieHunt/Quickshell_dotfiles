@@ -21,6 +21,20 @@
 - **Power behavior:** Optional low-battery profile fallback and eco-mode
   brightness adjustment.
 
+## Screenshots
+
+| Application launcher | Desktop and media controls |
+| --- | --- |
+| ![Application launcher](./screen/app.webp) | ![Desktop with media controls](./screen/desk_musique.webp) |
+
+| Performance and quick settings | Desktop overview |
+| --- | --- |
+| ![Performance panel and quick settings](./screen/panel.png) | ![Desktop overview](./screen/ff.webp) |
+
+| Power menu | Wallpaper picker |
+| --- | --- |
+| ![Power and session menu](./screen/reboot.webp) | ![Wallpaper picker](./screen/wp.webp) |
+
 ## Requirements
 
 - Linux with **Wayland** and **Hyprland**.
