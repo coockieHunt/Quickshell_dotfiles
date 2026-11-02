@@ -10,4 +10,4 @@
 *.log
 
 # Local generated configuration
-/config.json
+config.jsonc
