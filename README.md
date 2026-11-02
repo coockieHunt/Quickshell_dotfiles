@@ -1,25 +1,87 @@
 # Quickshell Desktop Configuration
 
-> **Warning:** These dotfiles were made for a **Lenovo ThinkPad T14 Gen 2**.
+> **Note**
+>
+> These dotfiles were made for a **Lenovo ThinkPad T14 Gen 2**.
+>
 > They are provided as-is, with no guarantee that they will work correctly on
-> other computers. Hardware, display, audio, network, and power-management
-> differences will likely require adaptations. Review the configuration and
-> scripts before using them on another machine.
+> other hardware. Differences in displays, GPUs, audio, networking, battery
+> management, and power controls may require some adjustments.
+>
+> In short: it works on my machine. From there, Linux may have its own ideas.
 
 ## Features
 
-- **Top bar:** Hyprland workspace controls, clock, media controls, battery and
-  system indicators, notifications, and power menu.
-- **Control panel:** Quick Wi-Fi, Bluetooth, sound, airplane-mode, brightness,
-  and TLP power-profile controls; notification history and process/system
-  performance information.
-- **Desktop widgets:** Clock, weather, system usage, and network status.
-- **Wallpaper tools:** Wallpaper picker, random selection, and Matugen-generated
-  colors shared with the interface and Hyprland borders.
-- **Other panels:** Application launcher, power/session menu, and volume and
-  brightness on-screen display.
-- **Power behavior:** Optional low-battery profile fallback and eco-mode
-  brightness adjustment.
+### Top bar
+
+- Hyprland workspace controls
+- Clock
+- Media controls
+- Battery and system indicators
+- Notifications
+- Power menu
+
+### Control panel
+
+Quick access to:
+
+- Wi-Fi
+- Bluetooth
+- Volume
+- Airplane mode
+- Brightness
+- TLP power profiles
+- Notification history
+- System information
+- Process and performance information
+
+### Desktop widgets
+
+- Clock
+- Weather
+- System usage
+- Network status
+
+### Wallpaper tools
+
+The wallpaper system includes:
+
+- Wallpaper picker
+- Random wallpaper selection
+- Matugen color generation
+- Shared colors between the interface and Hyprland borders
+
+Changing the wallpaper can therefore also change the overall color palette of
+the desktop.
+
+### Other panels
+
+- Application launcher
+- Power/session menu
+- Volume OSD
+- Brightness OSD
+
+### Power management
+
+Optional power-related features include:
+
+- Low-battery profile fallback
+- Eco mode
+- Brightness adjustments
+- TLP power profiles
+- Battery charge thresholds
+
+### Battery charge modes
+
+Two charge modes are available:
+
+- **Travel** — 0 / 95%
+- **Safe** — 75 / 80%
+
+These make it easy to switch between normal use and a more battery-friendly
+charging range.
+
+---
 
 ## Screenshots
 
@@ -35,32 +97,77 @@
 | --- | --- |
 | ![Power and session menu](./screen/reboot.webp) | ![Wallpaper picker](./screen/wp.webp) |
 
+---
+
 ## Requirements
 
-- Linux with **Wayland** and **Hyprland**.
-- [Quickshell](https://quickshell.org/) with the Qt modules used by this
-  configuration, including Wayland, Hyprland, UPower, MPRIS, PipeWire, and
-  Notifications services.
-- Common utilities: `bash`, `curl`, `cat`, `ps`, `nmcli` (NetworkManager),
-  `bluetoothctl` (BlueZ), `wpctl` (WirePlumber), `brightnessctl`, `notify-send`,
-  `systemctl`, and `hyprctl`.
-- **TLP** for power-profile controls. The profile script uses non-interactive
-  `sudo -n`; TLP commands therefore need to be permitted by the machine's sudo
-  policy.
-- **Matugen** for wallpaper color generation.
-- Optional integrations: `pavucontrol`, `nm-connection-editor`, `xdg-open`,
-  `hyprshutdown`, and a Quickshell-compatible lock screen at
-  `~/.local/share/quickshell-lockscreen`.
-- A wallpaper collection in `~/Pictures/wallpapers`.
+The setup requires:
 
-The weather widget fetches current conditions from Open-Meteo and needs an
-internet connection. Some system readings depend on Linux `/proc` and `/sys`
-interfaces being available.
+- Linux with **Wayland**
+- **Hyprland**
+- **Quickshell**
+- The Quickshell modules used by this configuration:
+  - Wayland
+  - Hyprland
+  - UPower
+  - MPRIS
+  - PipeWire
+  - Notifications
+
+Common utilities:
+
+- `bash`
+- `curl`
+- `cat`
+- `ps`
+- `nmcli`
+- `bluetoothctl`
+- `wpctl`
+- `brightnessctl`
+- `notify-send`
+- `systemctl`
+- `hyprctl`
+
+For power management:
+
+- **TLP**
+- A running **Polkit authentication agent**
+
+For wallpaper colors:
+
+- **Matugen**
+
+Optional integrations:
+
+- `pavucontrol`
+- `nm-connection-editor`
+- `xdg-open`
+- `hyprshutdown`
+- A Quickshell-compatible lock screen at `~/.local/share/quickshell-lockscreen`
+
+A wallpaper collection is expected in:
+
+```text
+~/Pictures/wallpapers
+```
+
+The weather widget uses **Open-Meteo** and therefore requires an internet
+connection.
+
+Some system readings rely on Linux `/proc` and `/sys` interfaces being
+available.
+
+---
 
 ## Install and run
 
-Place this directory at `~/.config/quickshell`, then generate the default local
-configuration before starting the shell:
+Place this directory at:
+
+```text
+~/.config/quickshell
+```
+
+Then run:
 
 ```sh
 cd ~/.config/quickshell
@@ -68,111 +175,186 @@ cd ~/.config/quickshell
 qs -p ~/.config/quickshell
 ```
 
-The shell is designed to run in a Hyprland session. Some commands are launched
-through Hyprland IPC and will not work in other compositors without changes.
+The shell is designed to run inside a Hyprland session.
+
+Some commands use Hyprland IPC and will therefore require adjustments when
+used with another compositor.
+
+---
 
 ## Configuration
 
-Edit [`config.jsonc`](./config.jsonc) to change colors, widget location and
-refresh intervals, weather coordinates, default control-panel view, power
-fallback settings, eco levels, and wallpaper palette labels.
+The main configuration is stored in [`config.jsonc`](./config.jsonc). It can
+be used to change:
 
-[`create-config.sh`](./create-config.sh) creates a default `config.json` if one
-does not already exist and leaves an existing file untouched. This generated
-local file is ignored by Git. The current shell loads the tracked
-[`config.jsonc`](./config.jsonc); edit that file to customize the active
-settings.
+- Colors
+- Widget positions
+- Refresh intervals
+- Weather coordinates
+- Default control-panel view
+- Power fallback settings
+- Eco levels
+- Wallpaper palette labels
 
-The wallpaper picker reads images from `~/Pictures/wallpapers`. The scripts
-store the selected wallpaper and generated theme colors under `~/.cache`.
+[`create-config.sh`](./create-config.sh) creates a default `config.jsonc` if
+one does not already exist. If the file already exists, it leaves it untouched.
 
-## Sudo and TLP setup
+The wallpaper picker reads images from:
 
-The power-profile controls use `sudo -n` (non-interactive sudo). The current
-[`scripts/power-profile.sh`](./scripts/power-profile.sh) runs
-`/usr/bin/tlp-stat -s` to display the active profile and switches profiles with
-`/usr/bin/tlp`. These exact commands must be allowed without a password.
-
-### Option 1: `tlpctl` (TLP 1.9+ with `tlp-pd`)
-
-If you use TLP 1.9 or newer with `tlp-pd` installed, profiles can be switched
-without root privileges:
-
-```bash
-tlpctl performance   # AC profile
-tlpctl balanced      # BAT profile
-tlpctl power-saver   # SAV profile
+```text
+~/Pictures/wallpapers
 ```
 
-To use this option without a sudoers rule, update
-[`scripts/power-profile.sh`](./scripts/power-profile.sh) to use `tlpctl`
-instead of `sudo -n tlp` for profile changes. The script also calls
-`sudo -n /usr/bin/tlp-stat -s` to display the current profile; update that
-status check as well if you want to remove all sudo requirements.
+Selected wallpapers and generated theme colors are stored under:
 
-### Option 2: sudoers rule
+```text
+~/.cache
+```
 
-1. Check the paths of the TLP commands:
+---
 
-   ```bash
-   command -v tlp
-   command -v tlp-stat
-   ```
+## TLP profiles, charge limits and Polkit
 
-   The script currently uses `/usr/bin/tlp` and `/usr/bin/tlp-stat`. If your
-   commands are installed elsewhere, update the script paths as well.
+The quick-settings panel provides three power profiles:
 
-2. Create a dedicated sudoers file with `visudo` (never edit `/etc/sudoers`
-   directly):
+- **Eco**
+- **Balanced**
+- **Performance**
 
-   ```bash
-   sudo visudo -f /etc/sudoers.d/tlp-quickshell
-   ```
+Selecting a profile closes the panel and runs the corresponding `/usr/bin/tlp`
+command through `pkexec`.
 
-3. Add the following line, replacing `YOUR_USER` with your Linux username and
-   adjusting command paths if needed:
+A running Polkit authentication agent is therefore required.
 
-   ```
-   YOUR_USER ALL=(root) NOPASSWD: /usr/bin/tlp performance, /usr/bin/tlp balanced, /usr/bin/tlp power-saver, /usr/bin/tlp-stat -s
-   ```
+Battery charge modes use the same mechanism through `tlp setcharge`.
 
-   This allows only the profile commands and status query currently used by
-   the script. Avoid allowing `tlp` with arbitrary arguments.
+The configured modes are:
 
-4. Check the syntax and test:
+- **Travel** — 0 / 95%
+- **Safe** — 75 / 80%
 
-   ```bash
-   sudo visudo -c
-   sudo -n /usr/bin/tlp balanced && echo OK
-   sudo -n /usr/bin/tlp-stat -s
-   ```
+These thresholds are temporary TLP settings and may be replaced when TLP
+reapplies its configured battery thresholds.
 
-> **Note:** Review the files in `scripts/` before enabling passwordless sudo,
-> and make sure the allowed commands match exactly what they run.
+No passwordless sudoers rule is required.
 
-## Hardware and portability notes
+Make sure that:
 
-- GPU usage is read from AMD-style
-  `/sys/class/drm/card*/device/gpu_busy_percent` paths; it may be unavailable
-  on other GPUs or kernels.
-- Temperature, battery, brightness, and power-profile readings depend on the
-  hardware and system services exposed by the host.
-- Power controls require a working TLP installation and suitable sudo policy.
-- Review paths and commands in `panels/Notifications.qml`,
-  `components/PowerSlider.qml`, and `scripts/` when adapting the setup. Some
-  script paths may need updating for another user or installation location.
-- Power, logout, reboot, lock, network, Bluetooth, and brightness controls
-  perform real system actions. Test them carefully.
+- TLP is installed;
+- a Polkit authentication agent is running;
+- the system allows the authenticated user to run `/usr/bin/tlp`.
+
+The scripts currently expect:
+
+```text
+/usr/bin/tlp
+/usr/bin/tlp-stat
+```
+
+Adjust [`scripts/power-profile.sh`](./scripts/power-profile.sh) if they are
+installed elsewhere.
+
+The active TLP profile is read with `tlp-stat -s` without elevation.
+
+Charge threshold information is read from the battery's sysfs interface.
+
+If the battery hardware or driver does not support charge thresholds, these
+controls will not be available.
+
+---
+
+## Hardware and portability
+
+Some parts of the configuration depend on the hardware exposing specific Linux
+interfaces.
+
+### GPU
+
+GPU usage is currently read from AMD-style paths:
+
+```text
+/sys/class/drm/card*/device/gpu_busy_percent
+```
+
+This may therefore be unavailable on other GPUs or kernels.
+
+### System information
+
+Temperature, battery, brightness, and power information depend on what the
+hardware and kernel expose.
+
+### Adapting the configuration
+
+When using this setup on another machine, check:
+
+- `panels/Notifications.qml`
+- `components/PowerSlider.qml`
+- `scripts/`
+
+Some paths and commands may need to be changed depending on the installation.
+
+Power, logout, reboot, lock, network, Bluetooth, and brightness controls
+perform real system actions.
+
+So yes, the buttons actually do things.
+
+---
 
 ## Layout
 
-- `shell.qml` — application entry point.
-- `panels/` — bar, widgets, launcher, notifications, performance, wallpaper,
-  OSD, and power interfaces.
-- `components/` — reusable UI elements.
-- `theme/Theme.qml` — loads the JSONC settings and generated wallpaper colors.
-- `scripts/` — wallpaper, TLP power-profile, and lock-screen helpers.
+```text
+shell.qml
+```
+
+Main application entry point.
+
+```text
+panels/
+```
+
+Bar, widgets, launcher, notifications, performance, wallpaper, OSD, and power
+interfaces.
+
+```text
+components/
+```
+
+Reusable UI components.
+
+```text
+theme/Theme.qml
+```
+
+Loads the JSONC configuration and generated wallpaper colors.
+
+```text
+scripts/
+```
+
+Wallpaper, TLP power-profile, and lock-screen helpers.
+
+---
+
+## About the project
+
+This configuration started from a simple idea: bring the different parts of my
+desktop together instead of maintaining a collection of separate tools and
+scripts.
+
+The goal is not to provide a universal Hyprland setup.
+
+It is simply a desktop environment that I can understand, modify, and adapt
+without relying on a large pre-made configuration.
+
+I prefer knowing how things work rather than having something that simply
+works.
+
+There are probably cleaner ways to do some of this.
+
+I just haven't found them yet.
+
+---
 
 ## License
 
-This project is distributed under the [MIT License](./LICENSE).
+MIT License. See [`LICENSE`](./LICENSE).

@@ -36,6 +36,10 @@ Singleton {
     property bool batteryPerformanceFallbackEnabled: true
     property int batteryPerformanceFallbackThresholdPercent: 20
     property string batteryFallbackProfile: "balanced"
+    property var tlpChargeModes: ({
+        deplacement: { start: 0, stop: 95 },
+        safe: { start: 75, stop: 80 }
+    })
     property bool reduceBrightnessInEco: true
     property string controlPanelDefaultMode: "notifications"
     property var ecoSettings: ({
@@ -169,6 +173,7 @@ Singleton {
                 const controlPanel = config.controlPanel
                 const performance = config.performance
                 const powerProfile = config.powerProfile
+                const tlpChargeModes = powerProfile?.tlpChargeModes || root.tlpChargeModes
                 const weather = widgets?.weather
                 const eco = config.eco
                 const labels = config.wallpaperPaletteLabels
@@ -188,6 +193,13 @@ Singleton {
                         || powerProfile.batteryFallbackThresholdPercent > 100
                         || !["eco", "balanced"].includes(powerProfile.batteryFallbackProfile)
                         || typeof powerProfile.reduceBrightnessInEco !== "boolean"
+                        || !tlpChargeModes
+                        || !["deplacement", "safe"].every(mode => {
+                            const limits = tlpChargeModes[mode]
+                            return limits
+                                && Number.isInteger(limits.start) && limits.start >= 0 && limits.start < 100
+                                && Number.isInteger(limits.stop) && limits.stop > limits.start && limits.stop <= 100
+                        })
                         || !Number.isInteger(performance.statsRefreshSeconds) || performance.statsRefreshSeconds < 1 || performance.statsRefreshSeconds > 60
                         || !Number.isInteger(performance.processRefreshSeconds) || performance.processRefreshSeconds < 5 || performance.processRefreshSeconds > 300
                         || !Number.isInteger(performance.temperatureRefreshSeconds) || performance.temperatureRefreshSeconds < 5 || performance.temperatureRefreshSeconds > 300
@@ -221,6 +233,7 @@ Singleton {
                 root.batteryPerformanceFallbackEnabled = powerProfile.batteryFallbackEnabled
                 root.batteryPerformanceFallbackThresholdPercent = powerProfile.batteryFallbackThresholdPercent
                 root.batteryFallbackProfile = powerProfile.batteryFallbackProfile
+                root.tlpChargeModes = tlpChargeModes
                 root.reduceBrightnessInEco = powerProfile.reduceBrightnessInEco
                 root.controlPanelDefaultMode = controlPanel.defaultMode
                 root.ecoSettings = eco

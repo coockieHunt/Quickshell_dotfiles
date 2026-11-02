@@ -114,11 +114,27 @@ Item {
 
                 Connections {
                     target: powerSlider
+                    function onProfileRequested(profile) {
+                        controller.panelOpen = false
+                    }
                     function onProfileChanged(profile) {
                         controller.handlePowerProfileSelected(
                             ["power-saver", "balanced", "performance"][profile])
                     }
                 }
+            }
+
+            SegmentedControl {
+                width: parent.width
+                options: [
+                    { label: "Déplacement" },
+                    { label: "Safe" }
+                ]
+                selectedIndex: root.controller.tlpChargeMode === "deplacement" ? 0
+                    : root.controller.tlpChargeMode === "safe" ? 1 : -1
+                enabled: !root.controller.tlpChargeCommandRunning
+                onSelected: index => root.controller.setTlpChargeMode(
+                    ["deplacement", "safe"][index])
             }
 
             LevelSlider {

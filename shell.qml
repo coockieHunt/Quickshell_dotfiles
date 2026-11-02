@@ -8,6 +8,7 @@ Scope {
     property bool barVisible: true
 
     Wallpaper {}
+    DriftBackdrop {}
     DesktopWidgets {}
     Launcher { id: launcher }
     WallpaperPicker { id: picker }

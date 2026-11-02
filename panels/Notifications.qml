@@ -14,6 +14,9 @@ Scope {
     property bool panelOpen: false
     property string panelMode: "notifications"
     property string powerProfile: ""
+    property string tlpChargeMode: ""
+    property string pendingTlpChargeMode: ""
+    property bool tlpChargeCommandRunning: false
     property var performanceControl: null
     property var history: []
     property bool wifiEnabled: false
@@ -192,6 +195,29 @@ Scope {
         }
     }
 
+    function setTlpChargeMode(mode) {
+        const limits = Theme.tlpChargeModes[mode]
+        if (!limits || tlpChargeCommandRunning)
+            return
+
+        pendingTlpChargeMode = mode
+        tlpChargeCommand.command = [
+            "bash",
+            "/home/jonathan/.config/quickshell/scripts/power-profile.sh",
+            "charge",
+            String(limits.start),
+            String(limits.stop)
+        ]
+        tlpChargeCommandRunning = true
+        panelOpen = false
+        tlpChargeLaunchTimer.start()
+    }
+
+    function refreshTlpChargeMode() {
+        if (!tlpChargeStatus.running)
+            tlpChargeStatus.running = true
+    }
+
     function shouldReduceEcoBrightness() {
         return Theme.reduceBrightnessInEco
             && (ecoModeActive || powerProfile === "power-saver")
@@ -350,6 +376,7 @@ Scope {
     Component.onCompleted: {
         checkBatteryPerformanceFallback()
         activePowerProfileStatus.running = true
+        refreshTlpChargeMode()
         refreshNetworkStatus()
     }
 
@@ -385,6 +412,70 @@ Scope {
         }
         stderr: SplitParser {
             onRead: line => console.warn("Balanced power profile:", line)
+        }
+    }
+
+    Process {
+        id: tlpChargeCommand
+        onExited: (exitCode, exitStatus) => {
+            root.tlpChargeCommandRunning = false
+            if (exitCode === 0) {
+                root.tlpChargeMode = root.pendingTlpChargeMode
+                root.refreshTlpChargeMode()
+            } else {
+                console.warn("TLP charge threshold update failed:", exitCode, exitStatus)
+                root.refreshTlpChargeMode()
+            }
+            root.pendingTlpChargeMode = ""
+        }
+        stderr: SplitParser {
+            onRead: line => console.warn("TLP charge thresholds:", line)
+        }
+    }
+
+    Timer {
+        id: tlpChargeLaunchTimer
+        interval: 200
+        repeat: false
+        onTriggered: tlpChargeCommand.running = true
+    }
+
+    Process {
+        id: tlpChargeStatus
+        command: ["bash", "/home/jonathan/.config/quickshell/scripts/power-profile.sh", "charge-status"]
+        stdout: StdioCollector {
+            id: tlpChargeStatusOutput
+        }
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode !== 0) {
+                console.warn("Reading TLP charge thresholds failed:", exitCode, exitStatus)
+                return
+            }
+
+            const match = tlpChargeStatusOutput.text.trim().match(/^(\d+)\s+(\d+)$/)
+            if (!match) {
+                console.warn("TLP charge threshold status returned invalid output:", tlpChargeStatusOutput.text)
+                return
+            }
+
+            const start = Number(match[1])
+            const stop = Number(match[2])
+            const modes = Object.keys(Theme.tlpChargeModes)
+            const exactMode = modes.find(mode => {
+                const limits = Theme.tlpChargeModes[mode]
+                return limits.start === start && limits.stop === stop
+            })
+            if (exactMode) {
+                root.tlpChargeMode = exactMode
+                return
+            }
+
+            const stopMatches = modes.filter(mode => Theme.tlpChargeModes[mode].stop === stop)
+            if (stopMatches.length === 1)
+                root.tlpChargeMode = stopMatches[0]
+        }
+        stderr: SplitParser {
+            onRead: line => console.warn("TLP charge threshold status:", line)
         }
     }
 

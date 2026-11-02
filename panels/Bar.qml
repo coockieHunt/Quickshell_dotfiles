@@ -5,6 +5,8 @@ import Quickshell.Hyprland
 import Quickshell.Services.UPower
 import QtQuick
 import "../components"
+import "../components/tooltip"
+import "../components/tooltip"
 import "../theme"
 
 Scope {
@@ -390,29 +392,19 @@ Scope {
                             z: 1
                         }
 
-                        PopupTooltip {
+                        ConnectivityTooltip {
                             anchorItem: wifiButton
                             shown: wifiButton.hovered
                             title: "Wi-Fi"
                             icon: "wifi"
-                            rows: [
-                                {
-                                    icon: "power_settings_new",
-                                    label: "État",
-                                    value: !barRoot.notificationControl.wifiStateKnown
-                                        ? "Lecture…"
-                                        : barRoot.notificationControl.wifiEnabled ? "Activé" : "Désactivé"
-                                },
-                                {
-                                    icon: "wifi",
-                                    label: "Réseau",
-                                    value: !barRoot.notificationControl.wifiStateKnown
-                                        ? "Lecture…"
-                                        : !barRoot.notificationControl.wifiEnabled
-                                            ? "Wi-Fi désactivé"
-                                            : barRoot.notificationControl.wifiNetworkName || "Non connecté"
-                                }
-                            ]
+                            status: !barRoot.notificationControl.wifiStateKnown
+                                ? "Lecture…"
+                                : barRoot.notificationControl.wifiEnabled ? "Activé" : "Désactivé"
+                            detail: !barRoot.notificationControl.wifiStateKnown
+                                ? ""
+                                : !barRoot.notificationControl.wifiEnabled
+                                    ? ""
+                                    : barRoot.notificationControl.wifiNetworkName || "Non connecté"
                         }
                     }
 
@@ -443,29 +435,19 @@ Scope {
                             z: 1
                         }
 
-                        PopupTooltip {
+                        ConnectivityTooltip {
                             anchorItem: bluetoothButton
                             shown: bluetoothButton.hovered
                             title: "Bluetooth"
                             icon: "bluetooth"
-                            rows: [
-                                {
-                                    icon: "power_settings_new",
-                                    label: "État",
-                                    value: !barRoot.notificationControl.bluetoothStateKnown
-                                        ? "Lecture…"
-                                        : barRoot.notificationControl.bluetoothEnabled ? "Activé" : "Désactivé"
-                                },
-                                {
-                                    icon: "devices",
-                                    label: "Connectés",
-                                    value: !barRoot.notificationControl.bluetoothStateKnown
-                                        ? "Lecture…"
-                                        : !barRoot.notificationControl.bluetoothEnabled
-                                            ? "Bluetooth désactivé"
-                                            : barRoot.notificationControl.bluetoothConnectedNames || "Aucun appareil"
-                                }
-                            ]
+                            status: !barRoot.notificationControl.bluetoothStateKnown
+                                ? "Lecture…"
+                                : barRoot.notificationControl.bluetoothEnabled ? "Activé" : "Désactivé"
+                            detail: !barRoot.notificationControl.bluetoothStateKnown
+                                ? ""
+                                : !barRoot.notificationControl.bluetoothEnabled
+                                    ? ""
+                                    : barRoot.notificationControl.bluetoothConnectedNames || "Aucun appareil"
                         }
                     }
 
@@ -545,29 +527,24 @@ Scope {
                             height: Theme.buttonSize
                             spacing: Theme.spacing / 2
 
-                            PopupTooltip {
+                            BatteryTooltip {
                                 anchorItem: batteryIndicator
                                 shown: batteryHover.hovered
-                                title: "Batterie"
-                                icon: batteryIndicator.modelData.state === UPowerDeviceState.Charging
-                                    ? "battery_charging_full" : "battery_full"
-                                rows: [
-                                    {
-                                        icon: "battery_std",
-                                        label: "État",
-                                        value: batteryIndicator.batteryStatus
-                                    },
-                                    {
-                                        icon: "battery_5_bar",
-                                        label: "Charge",
-                                        value: `${Math.round(batteryIndicator.modelData.percentage * 100)} %`
-                                    },
-                                    {
-                                        icon: "bolt",
-                                        label: "Puissance",
-                                        value: batteryIndicator.powerFlow
-                                    }
-                                ]
+                                status: batteryIndicator.batteryStatus
+                                powerFlow: batteryIndicator.powerFlow
+                                percentage: batteryIndicator.modelData.percentage
+                                chargeMode: {
+                                    const mode = barRoot.notificationControl.tlpChargeMode
+                                    if (mode === "deplacement")
+                                        return "Déplacement"
+                                    if (mode === "safe")
+                                        return "Safe"
+                                    return "Inconnu"
+                                }
+                                chargeModeIcon: barRoot.notificationControl.tlpChargeMode === "deplacement"
+                                    ? "directions_walk"
+                                    : barRoot.notificationControl.tlpChargeMode === "safe"
+                                        ? "health_and_safety" : "battery_unknown"
                             }
 
                             Text {

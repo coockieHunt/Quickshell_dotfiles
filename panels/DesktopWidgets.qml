@@ -7,6 +7,7 @@ import "../theme"
 
 Scope {
     id: root
+    property bool hiddenForDrift: false
 
     readonly property string position: Theme.desktopWidgetPosition
     readonly property int widgetMargin: Theme.desktopWidgetMargin
@@ -27,6 +28,12 @@ Scope {
     property real memoryTotal: 0
     property bool hasCpuSample: false
     property string networkStatus: "Vérification..."
+
+    IpcHandler {
+        target: "desktop-widgets"
+        function hideForDrift(): void { root.hiddenForDrift = true }
+        function showAfterDrift(): void { root.hiddenForDrift = false }
+    }
 
     function refreshWeather() {
         if (!weatherProcess.running)
@@ -215,6 +222,7 @@ Scope {
         PanelWindow {
             required property var modelData
             screen: modelData
+            visible: !root.hiddenForDrift
             anchors {
                 top: root.position.startsWith("top")
                 bottom: root.position.startsWith("bottom")

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-config_file="$script_dir/config.json"
+config_file="$script_dir/config.jsonc"
 
 if [[ -e "$config_file" ]]; then
     printf 'Keeping existing %s\n' "$config_file"
@@ -35,7 +35,17 @@ if ! (set -o noclobber; cat > "$config_file" <<'EOF'
     "batteryFallbackEnabled": true,
     "batteryFallbackThresholdPercent": 20,
     "batteryFallbackProfile": "balanced",
-    "reduceBrightnessInEco": true
+    "reduceBrightnessInEco": true,
+    "tlpChargeModes": {
+      "deplacement": {
+        "start": 0,
+        "stop": 95
+      },
+      "safe": {
+        "start": 75,
+        "stop": 80
+      }
+    }
   },
   "desktopWidgets": {
     "position": "top-left",
