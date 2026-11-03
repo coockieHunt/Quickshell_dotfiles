@@ -349,9 +349,9 @@ without relying on a large pre-made configuration.
 I prefer knowing how things work rather than having something that simply
 works.
 
-There are probably cleaner ways to do some of this.
+🇫🇷 C’est une config perso, donc pas forcément la solution la plus élégante. Ça marche, je comprends comment, et je suis zen 🧘
 
-I just haven't found them yet.
+🇬🇧 It’s my own setup, so maybe not the most elegant solution. It works, I get how it works, and I’m zen 🧘
 
 ---
 
