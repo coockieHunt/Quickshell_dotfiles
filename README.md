@@ -192,9 +192,15 @@ be used to change:
 - Refresh intervals
 - Weather coordinates
 - Default control-panel view
+- Update manager command
 - Power fallback settings
 - Eco levels
 - Wallpaper palette labels
+
+The top-bar update button checks installed packages against Pacman's local sync
+databases with `pacman -Qu` every 15 minutes. Set
+`updates.applicationCommand` to an argument array in `config.jsonc` to change
+the application it launches (for example, `["octopi"]`).
 
 [`create-config.sh`](./create-config.sh) creates a default `config.jsonc` if
 one does not already exist. If the file already exists, it leaves it untouched.

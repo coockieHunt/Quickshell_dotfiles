@@ -1,5 +1,6 @@
 // Used by: 1 file(s)
 import Quickshell
+import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Services.UPower
@@ -17,7 +18,53 @@ Scope {
     required property var powerMenuControl
     required property var notificationControl
     property var performanceSource: null
+    property bool updateCheckKnown: false
+    property bool updateCheckHadErrors: false
+    property int availableUpdateCount: 0
     signal hideRequested()
+
+    Process {
+        id: updateCheckProcess
+        command: ["pacman", "-Qu"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const updates = text.trim()
+                barRoot.availableUpdateCount = updates.length === 0
+                    ? 0
+                    : updates.split("\n").filter(line => line.trim() !== "").length
+            }
+        }
+        stderr: SplitParser {
+            onRead: line => {
+                barRoot.updateCheckHadErrors = true
+                console.warn("Vérification des mises à jour Pacman:", line)
+            }
+        }
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode === 0 || (exitCode === 1 && !barRoot.updateCheckHadErrors)) {
+                barRoot.updateCheckKnown = true
+            } else {
+                barRoot.updateCheckKnown = false
+                console.warn("La vérification des mises à jour Pacman a échoué:", exitCode, exitStatus)
+            }
+        }
+    }
+
+    function checkForUpdates() {
+        if (updateCheckProcess.running)
+            return
+        updateCheckHadErrors = false
+        updateCheckProcess.running = true
+    }
+
+    Timer {
+        interval: 15 * 60 * 1000
+        repeat: true
+        running: true
+        onTriggered: barRoot.checkForUpdates()
+    }
+
+    Component.onCompleted: checkForUpdates()
 
     function popup(cmd, size) {
         const s = size || "700 500"
@@ -598,6 +645,48 @@ Scope {
                     Item {
                         width: Theme.spacing
                         height: 1
+                    }
+
+                    Item {
+                        width: updatesButton.width
+                        height: updatesButton.height
+
+                        BarButton {
+                            id: updatesButton
+                            label: "system_update_alt"
+                            tooltip: ""
+                            anchors.fill: parent
+                            onClicked: barRoot.popup(Theme.updateApplicationCommand.join(" "), "900 650")
+                        }
+
+                        Rectangle {
+                            anchors.right: parent.right
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: 2
+                            width: 7
+                            height: 7
+                            radius: width / 2
+                            color: Theme.accent
+                            visible: barRoot.updateCheckKnown && barRoot.availableUpdateCount > 0
+                            border.width: 1
+                            border.color: Theme.componentBackground
+                            z: 1
+                        }
+
+                        ConnectivityTooltip {
+                            anchorItem: updatesButton
+                            shown: updatesButton.hovered
+                            title: "Mises à jour"
+                            icon: "system_update_alt"
+                            status: !barRoot.updateCheckKnown
+                                ? "Vérification indisponible"
+                                : barRoot.availableUpdateCount > 0
+                                    ? barRoot.availableUpdateCount === 1
+                                        ? "1 mise à jour disponible"
+                                        : `${barRoot.availableUpdateCount} mises à jour disponibles`
+                                    : "Aucune mise à jour disponible"
+                            detail: "État des paquets installés (pacman -Qu)"
+                        }
                     }
 
                     BarButton {

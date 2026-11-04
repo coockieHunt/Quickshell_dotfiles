@@ -26,6 +26,9 @@ if ! (set -o noclobber; cat > "$config_file" <<'EOF'
   "controlPanel": {
     "defaultMode": "both"
   },
+  "updates": {
+    "applicationCommand": ["octopi"]
+  },
   "performance": {
     "statsRefreshSeconds": 3,
     "processRefreshSeconds": 15,

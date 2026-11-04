@@ -42,6 +42,7 @@ Singleton {
     })
     property bool reduceBrightnessInEco: true
     property string controlPanelDefaultMode: "notifications"
+    property var updateApplicationCommand: ["octopi"]
     property var ecoSettings: ({
         ecoVolume: 30,
         ecoBrightness: 30,
@@ -173,6 +174,7 @@ Singleton {
                 const controlPanel = config.controlPanel
                 const performance = config.performance
                 const powerProfile = config.powerProfile
+                const updates = config.updates
                 const tlpChargeModes = powerProfile?.tlpChargeModes || root.tlpChargeModes
                 const weather = widgets?.weather
                 const eco = config.eco
@@ -185,6 +187,9 @@ Singleton {
                         || typeof ui.accentBorders !== "boolean"
                         || !widgets || !validPositions.includes(widgets.position)
                         || !controlPanel || !["notifications", "both"].includes(controlPanel.defaultMode)
+                        || (updates && (!Array.isArray(updates.applicationCommand)
+                            || updates.applicationCommand.length === 0
+                            || !updates.applicationCommand.every(arg => typeof arg === "string" && arg.trim() !== "")))
                         || !performance
                         || !powerProfile
                         || typeof powerProfile.batteryFallbackEnabled !== "boolean"
@@ -236,6 +241,8 @@ Singleton {
                 root.tlpChargeModes = tlpChargeModes
                 root.reduceBrightnessInEco = powerProfile.reduceBrightnessInEco
                 root.controlPanelDefaultMode = controlPanel.defaultMode
+                if (updates)
+                    root.updateApplicationCommand = updates.applicationCommand
                 root.ecoSettings = eco
                 root.wallpaperPaletteLabels = labels
                 root.configRevision++
