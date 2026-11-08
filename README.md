@@ -35,6 +35,10 @@ Quick access to:
 - System information
 - Process and performance information
 
+The panel is named **Control Center** in the interface. Its keyboard button
+opens the shortcuts panel, which reads descriptions from `-- @desc:` comments
+in `~/.config/hypr/keybinding.lua`.
+
 ### Desktop widgets
 
 - Clock
@@ -56,10 +60,25 @@ the desktop.
 
 ### Other panels
 
-- Application launcher
+- Application launcher with application metadata
 - Power/session menu
 - Volume OSD
 - Brightness OSD
+
+### Application launcher
+
+Open the information button next to the application count to show details for
+the selected application, including its `.desktop` ID, `Exec` command,
+categories, and keywords. The folder button opens the user applications
+directory (`$XDG_DATA_HOME/applications`, or
+`~/.local/share/applications`) in Dolphin. Add or edit `.desktop` files there
+to customize launch commands, names, and icons.
+
+### Keyboard shortcuts
+
+The shortcuts panel reads `~/.config/hypr/keybinding.lua`. Add a
+`-- @desc: ...` comment immediately before an `hl.bind(...)` line to show an
+explanation beside that shortcut in the panel.
 
 ### Power management
 
@@ -318,8 +337,8 @@ Main application entry point.
 panels/
 ```
 
-Bar, widgets, launcher, notifications, performance, wallpaper, OSD, and power
-interfaces.
+Bar, widgets, launcher, control center, notifications, performance, wallpaper,
+OSD, power, and keyboard-shortcut interfaces.
 
 ```text
 components/
@@ -337,7 +356,8 @@ Loads the JSONC configuration and generated wallpaper colors.
 scripts/
 ```
 
-Wallpaper, TLP power-profile, and lock-screen helpers.
+Wallpaper, TLP power-profile, lock-screen, desktop-entry-folder helpers, and
+desktop-entry and keyboard-binding parsers.
 
 ---
 

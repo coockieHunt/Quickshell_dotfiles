@@ -159,8 +159,11 @@ Scope {
                     }
 
                     BarButton {
-                        label: "apps"
+                        label: "\uf303"
+                        iconFont: "JetBrainsMono Nerd Font"
                         iconColor: Theme.accent
+                        iconSize: Theme.iconSize - 2
+                        tooltip: "Ouvrir le lanceur"
                         onClicked: barRoot.launcherControl.toggle()
                     }
                     BarButton {
@@ -690,7 +693,8 @@ Scope {
                     }
 
                     BarButton {
-                        label: "notifications"
+                        label: "settings"
+                        tooltip: "Ouvrir le centre de contrôle"
                         highlighted: barRoot.notificationControl.panelOpen
                         onClicked: barRoot.notificationControl.togglePanel()
                     }

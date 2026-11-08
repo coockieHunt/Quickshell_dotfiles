@@ -33,19 +33,32 @@ Item {
             anchors.margins: Theme.margin
             spacing: Theme.spacing
 
-            Row {
+            Item {
                 width: parent.width
                 height: 28
-                spacing: Theme.spacing
 
                 Text {
-                    width: parent.width
-                    text: "Réglages rapides"
+                    anchors.left: parent.left
+                    anchors.right: macroButton.left
+                    anchors.rightMargin: Theme.spacing
+                    text: "Centre de contrôle"
                     color: Theme.text
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSize + 2
                     font.weight: Font.DemiBold
                     verticalAlignment: Text.AlignVCenter
+                }
+
+                BarButton {
+                    id: macroButton
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    label: "keyboard"
+                    tooltip: "Afficher les raccourcis clavier"
+                    onClicked: {
+                        controller.panelOpen = false
+                        controller.macroControl.openPanel()
+                    }
                 }
             }
 

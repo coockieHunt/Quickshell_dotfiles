@@ -14,6 +14,7 @@ Scope {
     property bool panelOpen: false
     property string panelMode: "notifications"
     property string powerProfile: ""
+    property var macroControl: null
     property string tlpChargeMode: ""
     property string pendingTlpChargeMode: ""
     property bool tlpChargeCommandRunning: false
@@ -809,7 +810,7 @@ Scope {
                         onDismissed: root.panelOpen = false
                     }
 
-                    NotificationPanel {
+                    ControlCenterPanel {
                         anchors.fill: parent
                         controller: root
                     }

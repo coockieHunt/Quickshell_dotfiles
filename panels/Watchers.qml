@@ -4,15 +4,22 @@ import Quickshell.Io
 import Quickshell.Services.UPower
 import QtQuick
 
+
 Scope {
     id: root
     property bool ready: false
     property bool lowWarned: false
+    readonly property string soundDir: "/usr/share/sounds/freedesktop/stereo/"
 
     Timer {
         interval: 2000
         running: true
         onTriggered: root.ready = true
+    }
+
+
+    function playSound(file) {
+        Quickshell.execDetached(["pw-play", soundDir + file])
     }
 
     function notify(title, body, urgency) {
@@ -23,8 +30,13 @@ Scope {
         target: UPower
         function onOnBatteryChanged() {
             if (!root.ready) return
-            if (UPower.onBattery) root.notify("Chargeur débranché", "Sur batterie")
-            else root.notify("Chargeur branché", "Système d'alimentation")
+            if (UPower.onBattery) {
+                root.playSound("power-unplug.oga")
+                root.notify("Chargeur débranché", "Sur batterie")
+            }else{
+                root.playSound("power-plug.oga")
+                root.notify("Chargeur branché", "Système d'alimentation")
+            }
         }
     }
 

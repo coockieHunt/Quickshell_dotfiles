@@ -5,6 +5,7 @@ import "../theme"
 Rectangle {
     id: root
     property string label: ""
+    property string iconFont: Theme.iconFont
     property string tooltip: ""
     property int iconSize: Theme.iconSize
     property bool highlighted: false
@@ -30,7 +31,7 @@ Rectangle {
         anchors.centerIn: parent
         text: root.label
         color: mouse.containsMouse ? root.hoverIconColor : root.iconColor
-        font.family: Theme.iconFont
+        font.family: root.iconFont
         font.pixelSize: root.iconSize
 
         Behavior on color {

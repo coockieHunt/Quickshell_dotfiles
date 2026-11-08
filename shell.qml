@@ -13,10 +13,12 @@ Scope {
     Launcher { id: launcher }
     WallpaperPicker { id: picker }
     PowerMenu { id: powerMenu }
+    Macro { id: macro }
     Watchers {}
     Notifications {
         id: notifications
         performanceControl: bar.performanceSource
+        macroControl: macro
     }
     OSD {}
 
