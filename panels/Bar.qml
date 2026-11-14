@@ -4,6 +4,8 @@ import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Services.UPower
+import Quickshell.Services.SystemTray
+import Quickshell.Widgets
 import QtQuick
 import "../components"
 import "../components/tooltip"
@@ -18,53 +20,7 @@ Scope {
     required property var powerMenuControl
     required property var notificationControl
     property var performanceSource: null
-    property bool updateCheckKnown: false
-    property bool updateCheckHadErrors: false
-    property int availableUpdateCount: 0
     signal hideRequested()
-
-    Process {
-        id: updateCheckProcess
-        command: ["pacman", "-Qu"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const updates = text.trim()
-                barRoot.availableUpdateCount = updates.length === 0
-                    ? 0
-                    : updates.split("\n").filter(line => line.trim() !== "").length
-            }
-        }
-        stderr: SplitParser {
-            onRead: line => {
-                barRoot.updateCheckHadErrors = true
-                console.warn("Vérification des mises à jour Pacman:", line)
-            }
-        }
-        onExited: (exitCode, exitStatus) => {
-            if (exitCode === 0 || (exitCode === 1 && !barRoot.updateCheckHadErrors)) {
-                barRoot.updateCheckKnown = true
-            } else {
-                barRoot.updateCheckKnown = false
-                console.warn("La vérification des mises à jour Pacman a échoué:", exitCode, exitStatus)
-            }
-        }
-    }
-
-    function checkForUpdates() {
-        if (updateCheckProcess.running)
-            return
-        updateCheckHadErrors = false
-        updateCheckProcess.running = true
-    }
-
-    Timer {
-        interval: 15 * 60 * 1000
-        repeat: true
-        running: true
-        onTriggered: barRoot.checkForUpdates()
-    }
-
-    Component.onCompleted: checkForUpdates()
 
     function popup(cmd, size) {
         const s = size || "700 500"
@@ -82,6 +38,8 @@ Scope {
 
         PanelWindow {
             required property var modelData
+            id: panelWindow
+            property bool trayPopupOpen: false
             screen: modelData
             visible: barRoot.barVisible
 
@@ -152,6 +110,7 @@ Scope {
                             MouseArea {
                                 id: workspaceMouse
                                 anchors.fill: parent
+                                hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: modelData.activate()
                             }
@@ -653,53 +612,19 @@ Scope {
                         height: 1
                     }
 
-                    Item {
-                        width: updatesButton.width
-                        height: updatesButton.height
-
-                        BarButton {
-                            id: updatesButton
-                            label: "system_update_alt"
-                            tooltip: ""
-                            anchors.fill: parent
-                            onClicked: barRoot.popup(Theme.updateApplicationCommand.join(" "), "900 650")
-                        }
-
-                        Rectangle {
-                            anchors.right: parent.right
-                            anchors.bottom: parent.bottom
-                            anchors.bottomMargin: 2
-                            width: 7
-                            height: 7
-                            radius: width / 2
-                            color: Theme.accent
-                            visible: barRoot.updateCheckKnown && barRoot.availableUpdateCount > 0
-                            border.width: 1
-                            border.color: Theme.componentBackground
-                            z: 1
-                        }
-
-                        ConnectivityTooltip {
-                            anchorItem: updatesButton
-                            shown: updatesButton.hovered
-                            title: "Mises à jour"
-                            icon: "system_update_alt"
-                            status: !barRoot.updateCheckKnown
-                                ? "Vérification indisponible"
-                                : barRoot.availableUpdateCount > 0
-                                    ? barRoot.availableUpdateCount === 1
-                                        ? "1 mise à jour disponible"
-                                        : `${barRoot.availableUpdateCount} mises à jour disponibles`
-                                    : "Aucune mise à jour disponible"
-                            detail: "État des paquets installés (pacman -Qu)"
-                        }
-                    }
-
                     BarButton {
                         label: "settings"
                         tooltip: "Ouvrir le centre de contrôle"
                         highlighted: barRoot.notificationControl.panelOpen
                         onClicked: barRoot.notificationControl.togglePanel()
+                    }
+
+                    BarButton {
+                        id: trayButton
+                        label: panelWindow.trayPopupOpen ? "expand_less" : "expand_more"
+                        tooltip: "Afficher les icônes de la zone de notification"
+                        highlighted: panelWindow.trayPopupOpen
+                        onClicked: panelWindow.trayPopupOpen = !panelWindow.trayPopupOpen
                     }
 
                     BarButton {
@@ -715,6 +640,115 @@ Scope {
                     width: parent.width
                     height: 1
                     color: Qt.rgba(Theme.componentBackground.r, Theme.componentBackground.g, Theme.componentBackground.b, 0.95)
+                }
+            }
+
+            PopupWindow {
+                id: trayPopup
+
+                anchor.window: trayButton.QsWindow.window
+                anchor.adjustment: PopupAdjustment.None
+                anchor.gravity: Edges.Bottom | Edges.Right
+                anchor.onAnchoring: {
+                    const content = trayButton.QsWindow.contentItem
+                    const pos = content.mapFromItem(
+                        trayButton,
+                        trayButton.width / 2 - trayPopup.width / 2,
+                        trayButton.height
+                    )
+                    anchor.rect.x = Math.max(4, Math.min(pos.x, content.width - trayPopup.width - 4))
+                    anchor.rect.y = pos.y
+                }
+
+                visible: panelWindow.trayPopupOpen && barRoot.barVisible
+                grabFocus: true
+                implicitWidth: 220
+                implicitHeight: Math.max(48, trayContent.implicitHeight + 16)
+                color: "transparent"
+                onVisibleChanged: {
+                    if (!visible)
+                        panelWindow.trayPopupOpen = false
+                }
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: Theme.cornerRadius
+                    color: Theme.componentBackground
+                    border.width: 1
+                    border.color: Theme.componentBorder
+
+                    Column {
+                        id: trayContent
+                        anchors.fill: parent
+                        anchors.margins: 8
+                        spacing: 2
+
+                        Repeater {
+                            model: SystemTray.items
+
+                            delegate: Rectangle {
+                                required property var modelData
+                                width: trayContent.width
+                                height: 34
+                                radius: Theme.cornerRadius
+                                color: trayItemMouse.containsMouse ? Theme.buttonHover : "transparent"
+
+                                Row {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 8
+                                    anchors.rightMargin: 8
+                                    spacing: 8
+
+                                    IconImage {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: 20
+                                        height: 20
+                                        source: modelData.icon
+                                    }
+
+                                    Text {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: parent.width - 36
+                                        text: modelData.tooltipTitle || modelData.title || modelData.id
+                                        color: Theme.text
+                                        font.family: Theme.fontFamily
+                                        font.pixelSize: Theme.fontSize
+                                        elide: Text.ElideRight
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: trayItemMouse
+                                    anchors.fill: parent
+                                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: mouse => {
+                                        if (modelData.onlyMenu
+                                                || (mouse.button === Qt.RightButton && modelData.hasMenu)) {
+                                            modelData.display(trayPopup, Math.round(mouse.x), Math.round(mouse.y))
+                                        } else if (mouse.button === Qt.LeftButton) {
+                                            modelData.activate()
+                                            panelWindow.trayPopupOpen = false
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Text {
+                            visible: SystemTray.items.count === 0
+                            width: trayContent.width
+                            height: 32
+                            text: "Aucune icône disponible"
+                            color: Theme.text
+                            opacity: 0.7
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSize
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
+                    }
                 }
             }
         }
