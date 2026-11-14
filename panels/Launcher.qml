@@ -12,6 +12,20 @@ PanelWindow {
 
     function toggle() { visible = !visible }
 
+    function openWebSearch() {
+        if (search.text.trim().length > 0) {
+            Quickshell.execDetached([
+                "xdg-open",
+                Theme.launcherSearchUrl.replace(
+                    /\{query\}/g,
+                    encodeURIComponent(search.text.trim())
+                )
+            ])
+            root.visible = false
+        }
+    }
+
+
     property var results: {
         if (desktopEntryParser.status !== Loader.Ready)
             return []
@@ -114,8 +128,11 @@ PanelWindow {
                             if (root.selectedEntry) {
                                 root.selectedEntry.execute()
                                 root.visible = false
+                            } else {
+                                root.openWebSearch()
                             }
                         }
+
                         onTextChanged: list.currentIndex = 0
                     }
 
@@ -128,13 +145,24 @@ PanelWindow {
                         radius: Theme.cornerRadius
                         color: Theme.componentSurface
 
-                        Text {
-                            anchors.centerIn: parent
-                            text: search.text.length > 0 ? "↵" : "↑ ↓"
-                            color: Qt.rgba(Theme.text.r, Theme.text.g, Theme.text.b, 0.65)
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSize - 1
-                        }
+                    Text {
+                        anchors.centerIn: parent
+                        text: search.text.trim().length === 0 ? "↑ ↓" : "travel_explore"
+                        color: Qt.rgba(Theme.text.r, Theme.text.g, Theme.text.b, 0.65)
+                        font.family: search.text.trim().length === 0
+                            ? Theme.fontFamily : Theme.iconFont
+                        font.pixelSize: search.text.trim().length === 0
+                            ? Theme.fontSize - 1 : Theme.iconSize
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        enabled: search.text.trim().length > 0
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.openWebSearch()
+                    }
+
+
                     }
 
                     Text {
@@ -151,57 +179,79 @@ PanelWindow {
                     }
                 }
 
-                ListView {
-                    id: list
-                    width: parent.width
-                    height: parent.height - 36 - 18 - Theme.spacing * 2
-                    clip: true
-                    model: root.results
-                    currentIndex: 0
+        ListView {
+            id: list
+            width: parent.width
+            height: parent.height - 36 - 18 - Theme.spacing * 2
+            clip: true
+            model: root.results
+            currentIndex: 0
 
-                    delegate: Rectangle {
-                        required property var modelData
-                        required property int index
-                        property bool selected: ListView.isCurrentItem
-                        width: list.width
-                        height: 36
-                        radius: Theme.cornerRadius
-                        color: selected
-                            ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.14)
-                            : "transparent"
+            Text {
+                anchors.centerIn: parent
+                width: parent.width - 32
+                visible: search.text.trim().length > 0
+                    && root.results.length === 0
+                text: "0 trouvée\nAppuyez sur Entrée pour chercher sur Internet"
+                color: Qt.rgba(Theme.text.r, Theme.text.g, Theme.text.b, 0.65)
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.Wrap
+                z: 1
+            }
 
-                        Row {
-                            anchors.fill: parent
-                            anchors.leftMargin: 10
-                            spacing: 10
+            delegate: Rectangle {
+                required property var modelData
+                required property int index
+                property bool selected: ListView.isCurrentItem
 
-                            Image {
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: 22
-                                height: 22
-                                source: Quickshell.iconPath(modelData.icon, "application-x-executable")
-                            }
-                            Text {
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: modelData.name
-                                color: Theme.text
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSize
-                            }
-                        }
+                width: list.width
+                height: 36
+                radius: Theme.cornerRadius
+                color: selected
+                    ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.14)
+                    : "transparent"
 
-                        MouseArea {
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            onEntered: list.currentIndex = index
-                            onClicked: {
-                                list.currentIndex = index
-                                modelData.execute()
-                                root.visible = false
-                            }
-                        }
+                Row {
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    spacing: 10
+
+                    Image {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 22
+                        height: 22
+                        source: Quickshell.iconPath(
+                            modelData.icon,
+                            "application-x-executable"
+                        )
+                    }
+
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: modelData.name
+                        color: Theme.text
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSize
                     }
                 }
+
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+
+                    onEntered: list.currentIndex = index
+
+                    onClicked: {
+                        list.currentIndex = index
+                        modelData.execute()
+                        root.visible = false
+                    }
+                }
+            }
+        }
+
 
                 Row {
                     width: parent.width

@@ -43,6 +43,7 @@ Singleton {
     property bool reduceBrightnessInEco: true
     property string controlPanelDefaultMode: "notifications"
     property var updateApplicationCommand: ["octopi"]
+    property string launcherSearchUrl: "https://duckduckgo.com/?q={query}"
     property var ecoSettings: ({
         ecoVolume: 30,
         ecoBrightness: 30,
@@ -175,6 +176,7 @@ Singleton {
                 const performance = config.performance
                 const powerProfile = config.powerProfile
                 const updates = config.updates
+                const launcher = config.launcher
                 const tlpChargeModes = powerProfile?.tlpChargeModes || root.tlpChargeModes
                 const weather = widgets?.weather
                 const eco = config.eco
@@ -190,6 +192,8 @@ Singleton {
                         || (updates && (!Array.isArray(updates.applicationCommand)
                             || updates.applicationCommand.length === 0
                             || !updates.applicationCommand.every(arg => typeof arg === "string" && arg.trim() !== "")))
+                        || (launcher && (typeof launcher.searchUrl !== "string"
+                            || !/^https?:\/\/\S*\{query\}\S*$/i.test(launcher.searchUrl)))
                         || !performance
                         || !powerProfile
                         || typeof powerProfile.batteryFallbackEnabled !== "boolean"
@@ -243,6 +247,8 @@ Singleton {
                 root.controlPanelDefaultMode = controlPanel.defaultMode
                 if (updates)
                     root.updateApplicationCommand = updates.applicationCommand
+                if (launcher)
+                    root.launcherSearchUrl = launcher.searchUrl
                 root.ecoSettings = eco
                 root.wallpaperPaletteLabels = labels
                 root.configRevision++

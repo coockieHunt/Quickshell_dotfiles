@@ -26,6 +26,9 @@ if ! (set -o noclobber; cat > "$config_file" <<'EOF'
   "controlPanel": {
     "defaultMode": "both"
   },
+  "launcher": {
+    "searchUrl": "https://duckduckgo.com/?q={query}"
+  },
   "updates": {
     "applicationCommand": ["octopi"]
   },

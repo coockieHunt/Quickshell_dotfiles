@@ -118,60 +118,80 @@ Scope {
                             Repeater {
                                 model: root.keybindings
 
-                                delegate: Rectangle {
+                                delegate: Item {
                                     required property var modelData
                                     width: bindingsColumn.width
-                                    height: Math.max(38, bindingRow.implicitHeight + Theme.spacing)
-                                    radius: Theme.cornerRadius
-                                    color: Theme.componentSurface
+                                    height: modelData.type === "title"
+                                        ? titleLabel.implicitHeight + Theme.spacing / 2
+                                        : bindingCard.height
 
-                                    Row {
-                                        id: bindingRow
-                                        anchors {
-                                            fill: parent
-                                            margins: Theme.spacing / 2
-                                        }
-                                        spacing: Theme.spacing
+                                    Text {
+                                        id: titleLabel
+                                        visible: modelData.type === "title"
+                                        width: parent.width
+                                        text: modelData.title
+                                        color: Theme.text
+                                        font.family: Theme.fontFamily
+                                        font.pixelSize: Theme.fontSize + 1
+                                        font.weight: Font.DemiBold
+                                    }
 
-                                        Item {
-                                            id: shortcutCell
-                                            width: Math.max(72, shortcutLabel.implicitWidth + Theme.spacing * 2)
-                                            height: descriptionLabel.implicitHeight
+                                    Rectangle {
+                                        id: bindingCard
+                                        visible: modelData.type === "binding"
+                                        width: parent.width
+                                        height: Math.max(38, bindingRow.implicitHeight + Theme.spacing)
+                                        radius: Theme.cornerRadius
+                                        color: Theme.componentSurface
 
-                                            Rectangle {
-                                                id: shortcutKeyCap
-                                                anchors.centerIn: parent
-                                                width: shortcutCell.width
-                                                height: Math.max(28, shortcutLabel.implicitHeight + Theme.spacing)
-                                                radius: Theme.cornerRadius
-                                                color: Qt.rgba(
-                                                    Theme.accent.r,
-                                                    Theme.accent.g,
-                                                    Theme.accent.b,
-                                                    0.16
-                                                )
+                                        Row {
+                                            id: bindingRow
+                                            anchors {
+                                                fill: parent
+                                                margins: Theme.spacing / 2
+                                            }
+                                            spacing: Theme.spacing
 
-                                                Text {
-                                                    id: shortcutLabel
+                                            Item {
+                                                id: shortcutCell
+                                                width: Math.max(72, shortcutLabel.implicitWidth + Theme.spacing * 2)
+                                                height: descriptionLabel.implicitHeight
+
+                                                Rectangle {
+                                                    id: shortcutKeyCap
                                                     anchors.centerIn: parent
-                                                    text: modelData.shortcut
-                                                    color: Theme.accent
-                                                    font.family: "monospace"
-                                                    font.pixelSize: Theme.fontSize - 1
-                                                    font.weight: Font.DemiBold
-                                                    wrapMode: Text.Wrap
+                                                    width: shortcutCell.width
+                                                    height: Math.max(28, shortcutLabel.implicitHeight + Theme.spacing)
+                                                    radius: Theme.cornerRadius
+                                                    color: Qt.rgba(
+                                                        Theme.accent.r,
+                                                        Theme.accent.g,
+                                                        Theme.accent.b,
+                                                        0.16
+                                                    )
+
+                                                    Text {
+                                                        id: shortcutLabel
+                                                        anchors.centerIn: parent
+                                                        text: modelData.shortcut
+                                                        color: Theme.accent
+                                                        font.family: "monospace"
+                                                        font.pixelSize: Theme.fontSize - 1
+                                                        font.weight: Font.DemiBold
+                                                        wrapMode: Text.Wrap
+                                                    }
                                                 }
                                             }
-                                        }
 
-                                        Text {
-                                            id: descriptionLabel
-                                            width: bindingRow.width - shortcutCell.width - bindingRow.spacing
-                                            text: modelData.description
-                                            color: Theme.text
-                                            font.family: Theme.fontFamily
-                                            font.pixelSize: Theme.fontSize
-                                            wrapMode: Text.Wrap
+                                            Text {
+                                                id: descriptionLabel
+                                                width: bindingRow.width - shortcutCell.width - bindingRow.spacing
+                                                text: modelData.description
+                                                color: Theme.text
+                                                font.family: Theme.fontFamily
+                                                font.pixelSize: Theme.fontSize
+                                                wrapMode: Text.Wrap
+                                            }
                                         }
                                     }
                                 }

@@ -15,6 +15,8 @@ Rectangle {
     property color hoverIconColor: Theme.accent
     readonly property bool hovered: mouse.containsMouse
     signal clicked()
+    signal rightClicked()
+    signal middleClicked()
 
     width: Theme.buttonSize
     height: Theme.buttonSize
@@ -42,8 +44,16 @@ Rectangle {
     MouseArea {
         id: mouse
         anchors.fill: parent
+        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: root.clicked()
+        onClicked: mouse => {
+            if (mouse.button === Qt.RightButton)
+                root.rightClicked()
+            else if (mouse.button === Qt.MiddleButton)
+                root.middleClicked()
+            else
+                root.clicked()
+        }
     }
 }

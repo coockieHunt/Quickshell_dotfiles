@@ -35,10 +35,10 @@ Scope {
             WlrLayershell.layer: WlrLayer.Bottom
             WlrLayershell.namespace: "drift-backdrop"
             color: "transparent"
+            visible: root.shown
 
             Rectangle {
                 anchors.fill: parent
-                opacity: root.shown ? 1 : 0
                 color: Qt.rgba(0, 0, 0, 0.65)
             }
         }

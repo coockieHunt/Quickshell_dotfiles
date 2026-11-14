@@ -11,6 +11,9 @@ PanelWindow {
     id: root
     visible: false
     property string hoveredWallpaper: ""
+    property string wallpaperToDelete: ""
+    property string deletionError: ""
+    property bool deletingCurrentWallpaper: false
     property var previewPalette: []
     readonly property var paletteLabels: Theme.wallpaperPaletteLabels
     readonly property var currentPalette: [
@@ -26,6 +29,27 @@ PanelWindow {
     IpcHandler {
         target: "wallpaper"
         function toggle(): void { root.toggle() }
+    }
+
+    Process {
+        id: deleteProcess
+        command: [Theme.wallpaperScript, "delete", root.wallpaperToDelete]
+
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode === 0) {
+                if (root.hoveredWallpaper === root.wallpaperToDelete) {
+                    root.hoveredWallpaper = ""
+                    root.previewPalette = []
+                }
+                root.wallpaperToDelete = ""
+                if (root.deletingCurrentWallpaper)
+                    Quickshell.execDetached([Theme.wallpaperScript, "random"])
+                root.deletingCurrentWallpaper = false
+            } else {
+                root.deletionError = "La suppression du fond d’écran a échoué."
+                console.warn("Impossible de supprimer le fond d’écran:", root.wallpaperToDelete)
+            }
+        }
     }
 
     screen: Quickshell.screens[0]
@@ -75,6 +99,7 @@ PanelWindow {
                 cellWidth: Math.max(160, Math.floor(width / 4))
                 cellHeight: Math.round(cellWidth * 0.62)
                 clip: true
+                cacheBuffer: cellHeight
 
                 model: FolderListModel {
                     folder: "file://" + Theme.wallpaperDir
@@ -86,6 +111,9 @@ PanelWindow {
                     id: wallpaperItem
                     required property string filePath
                     property var paletteColors: []
+                    readonly property bool nearViewport:
+                        y + height >= grid.contentY - grid.cacheBuffer
+                        && y <= grid.contentY + grid.height + grid.cacheBuffer
                     width: grid.cellWidth
                     height: grid.cellHeight
 
@@ -125,13 +153,14 @@ PanelWindow {
                         id: thumbnail
                         anchors.fill: parent
                         anchors.margins: 4
-                        source: "file://" + filePath
+                        source: root.visible && wallpaperItem.nearViewport
+                            ? "file://" + filePath
+                            : ""
                         fillMode: Image.PreserveAspectCrop
                         sourceSize.width: grid.cellWidth - 8
                         sourceSize.height: grid.cellHeight - 8
                         asynchronous: true
-                        cache: true
-                        retainWhileLoading: true
+                        cache: false
                     }
 
                     Rectangle {
@@ -161,23 +190,57 @@ PanelWindow {
                     }
 
                     Rectangle {
+                        id: wallpaperBadge
                         anchors.left: parent.left
                         anchors.top: parent.top
                         anchors.margins: 8
-                        visible: filePath === Theme.wallpaper
-                        z: 2
-                        width: currentLabel.implicitWidth + 12
-                        height: currentLabel.implicitHeight + 6
+                        z: 4
+                        width: badgeContents.implicitWidth + Theme.margin
+                        height: Theme.buttonSize
                         radius: Theme.cornerRadius
-                        color: Theme.accent
+                        color: filePath === Theme.wallpaper
+                            ? (badgeMouse.containsMouse ? Theme.buttonHover : Theme.accent)
+                            : (badgeMouse.containsMouse ? Theme.buttonHover : Theme.componentSurface)
+                        border.width: 1
+                        border.color: filePath === Theme.wallpaper
+                            ? Theme.accent
+                            : Theme.componentBorder
 
-                        Text {
-                            id: currentLabel
+                        Row {
+                            id: badgeContents
                             anchors.centerIn: parent
-                            text: "Actuel"
-                            color: Theme.textOnAccent
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSize - 2
+                            spacing: Theme.spacing
+
+                            Text {
+                                visible: filePath === Theme.wallpaper
+                                text: "Actuel"
+                                color: Theme.textOnAccent
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSize - 2
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+
+                            Text {
+                                visible: filePath !== Theme.wallpaper
+                                text: "Supprimer"
+                                color: Theme.text
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSize - 2
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                        }
+
+                        MouseArea {
+                            id: badgeMouse
+                            anchors.fill: parent
+                            enabled: filePath !== Theme.wallpaper
+                            hoverEnabled: true
+                            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                            onClicked: {
+                                root.wallpaperToDelete = filePath
+                                root.deletingCurrentWallpaper = filePath === Theme.wallpaper
+                                root.deletionError = ""
+                            }
                         }
                     }
 
@@ -212,80 +275,30 @@ PanelWindow {
                     right: parent.right
                     bottom: parent.bottom
                 }
-                height: 72
+                height: 76
 
-                Text {
-                    id: paletteTitle
+                WallpaperPalette {
                     anchors.left: parent.left
                     anchors.top: parent.top
-                    text: "Palette"
-                    color: Theme.text
-                    font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontSize - 1
-                    font.weight: Font.DemiBold
-                }
-
-                Text {
-                    anchors.right: parent.right
-                    anchors.top: parent.top
-                    text: root.previewPalette.length > 0 ? "Aperçu" : "Thème actuel"
-                    color: Qt.rgba(Theme.text.r, Theme.text.g, Theme.text.b, 0.55)
-                    font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontSize - 3
+                    anchors.bottom: parent.bottom
+                    anchors.right: footerActions.left
+                    anchors.rightMargin: Theme.spacing
+                    colors: root.previewPalette.length > 0
+                        ? root.previewPalette
+                        : root.currentPalette
+                    labels: root.paletteLabels
+                    preview: root.previewPalette.length > 0
                 }
 
                 Row {
-                    anchors.left: parent.left
-                    anchors.top: paletteTitle.bottom
-                    anchors.topMargin: 4
-                    height: 42
-                    spacing: Theme.spacing
-
-                    Repeater {
-                        model: root.previewPalette.length > 0
-                            ? root.previewPalette
-                            : root.currentPalette
-
-                        Item {
-                            required property var modelData
-                            width: 48
-                            height: 42
-
-                            Column {
-                                anchors.fill: parent
-                                spacing: 3
-
-                                Rectangle {
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                    width: 24
-                                    height: 24
-                                    radius: width / 2
-                                    color: modelData.color
-                                    border.width: 0.5
-                                    border.color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.1)
-                                }
-
-                                Text {
-                                    width: parent.width
-                                    text: root.paletteLabels[modelData.key] || modelData.key
-                                    color: Qt.rgba(Theme.text.r, Theme.text.g, Theme.text.b, 0.72)
-                                    font.family: Theme.fontFamily
-                                    font.pixelSize: Theme.fontSize - 4
-                                    horizontalAlignment: Text.AlignHCenter
-                                    elide: Text.ElideRight
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Row {
+                    id: footerActions
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
-                    height: Theme.buttonSize
+                    height: Theme.buttonSize + Theme.spacing
                     spacing: Theme.spacing
 
                     BarButton {
+                        height: parent.height
                         label: "shuffle"
                         tooltip: "Choisir un fond d’écran au hasard"
                         onClicked: {
@@ -295,11 +308,92 @@ PanelWindow {
                     }
 
                     BarButton {
+                        height: parent.height
                         label: "folder_open"
                         tooltip: "Ouvrir le dossier des fonds d’écran"
                         onClicked: {
                             Quickshell.execDetached(["xdg-open", Theme.wallpaperDir])
                             root.visible = false
+                        }
+                    }
+
+                    TextButton {
+                        text: "Supprimer le fond actuel"
+                        enabled: Theme.wallpaper !== ""
+                        onClicked: {
+                            root.wallpaperToDelete = Theme.wallpaper
+                            root.deletingCurrentWallpaper = true
+                            root.deletionError = ""
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        visible: root.wallpaperToDelete !== ""
+        color: Qt.rgba(0, 0, 0, 0.55)
+        z: 10
+
+        MouseArea {
+            anchors.fill: parent
+        }
+
+        Rectangle {
+            anchors.centerIn: parent
+            width: Math.min(380, root.width - Theme.margin * 2)
+            height: confirmationContent.implicitHeight + Theme.margin * 2
+            radius: Theme.cornerRadius
+            color: Theme.componentBackground
+            border.color: Theme.componentBorder
+
+            Column {
+                id: confirmationContent
+                anchors.fill: parent
+                anchors.margins: Theme.margin
+                spacing: Theme.spacing
+
+                Text {
+                    width: parent.width
+                    text: "Supprimer ce fond d’écran ?"
+                    color: Theme.text
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize
+                    font.weight: Font.DemiBold
+                    wrapMode: Text.Wrap
+                }
+
+                Text {
+                    width: parent.width
+                    text: root.deletionError || "Cette action est définitive."
+                    color: root.deletionError ? Theme.danger : Theme.text
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize - 2
+                    wrapMode: Text.Wrap
+                }
+
+                Row {
+                    anchors.right: parent.right
+                    spacing: Theme.spacing
+
+                    TextButton {
+                        text: "Annuler"
+                        enabled: !deleteProcess.running
+                        onClicked: {
+                            root.wallpaperToDelete = ""
+                            root.deletingCurrentWallpaper = false
+                        }
+                    }
+
+                    TextButton {
+                        text: "Supprimer"
+                        highlighted: true
+                        enabled: !deleteProcess.running
+                        onClicked: {
+                            root.deletionError = ""
+                            deleteProcess.running = true
                         }
                     }
                 }

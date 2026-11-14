@@ -11,6 +11,15 @@ Item {
         for (let line of lines) {
             line = line.trim()
 
+            const titleMatch = line.match(/^--\s*@title(?:\s*:\s*|\s+)(.*)$/)
+            if (titleMatch) {
+                const title = titleMatch[1].trim()
+                if (title !== "")
+                    bindings.push({ type: "title", title: title })
+                description = ""
+                continue
+            }
+
             if (line.startsWith("-- @desc:")) {
                 description = line.substring(9).trim()
                 continue
@@ -34,6 +43,7 @@ Item {
                         .trim()
 
                 bindings.push({
+                    type: "binding",
                     shortcut: shortcut,
                     description: description || "Raccourci clavier"
                 })

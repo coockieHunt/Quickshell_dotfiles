@@ -168,7 +168,10 @@ Scope {
                     }
                     BarButton {
                         label: "wallpaper"
+                        tooltip: "Clic gauche : ouvrir le sélecteur\nClic droit : fond aléatoire\nClic molette : supprimer l’actuel"
                         onClicked: barRoot.wallpaperPicker.toggle()
+                        onRightClicked: Quickshell.execDetached([Theme.wallpaperScript, "random"])
+                        onMiddleClicked: Quickshell.execDetached([Theme.wallpaperScript, "delete-current"])
                     }
                     BarButton {
                         label: "fullscreen"

@@ -51,7 +51,13 @@ in `~/.config/hypr/keybinding.lua`.
 The wallpaper system includes:
 
 - Wallpaper picker
+- Memory-conscious loading of wallpaper previews
+- Current and hovered wallpaper color palette previews
 - Random wallpaper selection
+- Confirmed wallpaper deletion from the picker
+- Bar wallpaper button: left-click opens the picker, right-click selects a
+  random wallpaper, and middle-click deletes the current wallpaper and applies
+  a random one
 - Matugen color generation
 - Shared colors between the interface and Hyprland borders
 
@@ -67,6 +73,12 @@ the desktop.
 
 ### Application launcher
 
+Configure the web search URL in `config.jsonc` under `launcher.searchUrl`.
+Use `{query}` where the encoded search terms should appear; the default is
+`https://duckduckgo.com/?q={query}`.
+Press Enter to launch the selected application, or to search the web when no
+application matches. The web-search icon also starts a search.
+
 Open the information button next to the application count to show details for
 the selected application, including its `.desktop` ID, `Exec` command,
 categories, and keywords. The folder button opens the user applications
@@ -78,7 +90,8 @@ to customize launch commands, names, and icons.
 
 The shortcuts panel reads `~/.config/hypr/keybinding.lua`. Add a
 `-- @desc: ...` comment immediately before an `hl.bind(...)` line to show an
-explanation beside that shortcut in the panel.
+explanation beside that shortcut in the panel. Use `-- @title: ...` to add a
+section heading above subsequent shortcuts.
 
 ### Power management
 
