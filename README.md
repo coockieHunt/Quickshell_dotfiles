@@ -117,16 +117,16 @@ charging range.
 
 ## Screenshots
 
-| Application launcher | Desktop and media controls |
-| --- | --- |
+| Application launcher                       | Desktop and media controls                                 |
+| ------------------------------------------ | ---------------------------------------------------------- |
 | ![Application launcher](./screen/app.webp) | ![Desktop with media controls](./screen/desk_musique.webp) |
 
-| Performance and quick settings | Desktop overview |
-| --- | --- |
+| Performance and quick settings                              | Desktop overview                      |
+| ----------------------------------------------------------- | ------------------------------------- |
 | ![Performance panel and quick settings](./screen/panel.png) | ![Desktop overview](./screen/ff.webp) |
 
-| Power menu | Wallpaper picker |
-| --- | --- |
+| Power menu                                      | Wallpaper picker                      |
+| ----------------------------------------------- | ------------------------------------- |
 | ![Power and session menu](./screen/reboot.webp) | ![Wallpaper picker](./screen/wp.webp) |
 
 ---
@@ -139,12 +139,12 @@ The setup requires:
 - **Hyprland**
 - **Quickshell**
 - The Quickshell modules used by this configuration:
-  - Wayland
-  - Hyprland
-  - UPower
-  - MPRIS
-  - PipeWire
-  - Notifications
+    - Wayland
+    - Hyprland
+    - UPower
+    - MPRIS
+    - PipeWire
+    - Notifications
 
 Common utilities:
 
@@ -228,11 +228,6 @@ be used to change:
 - Power fallback settings
 - Eco levels
 - Wallpaper palette labels
-
-The top-bar update button checks installed packages against Pacman's local sync
-databases with `pacman -Qu` every 15 minutes. Set
-`updates.applicationCommand` to an argument array in `config.jsonc` to change
-the application it launches (for example, `["octopi"]`).
 
 [`create-config.sh`](./create-config.sh) creates a default `config.jsonc` if
 one does not already exist. If the file already exists, it leaves it untouched.

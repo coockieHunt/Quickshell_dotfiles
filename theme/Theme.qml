@@ -42,7 +42,6 @@ Singleton {
     })
     property bool reduceBrightnessInEco: true
     property string controlPanelDefaultMode: "notifications"
-    property var updateApplicationCommand: ["octopi"]
     property string launcherSearchUrl: "https://duckduckgo.com/?q={query}"
     property var ecoSettings: ({
         ecoVolume: 30,
@@ -189,9 +188,6 @@ Singleton {
                         || typeof ui.accentBorders !== "boolean"
                         || !widgets || !validPositions.includes(widgets.position)
                         || !controlPanel || !["notifications", "both"].includes(controlPanel.defaultMode)
-                        || (updates && (!Array.isArray(updates.applicationCommand)
-                            || updates.applicationCommand.length === 0
-                            || !updates.applicationCommand.every(arg => typeof arg === "string" && arg.trim() !== "")))
                         || (launcher && (typeof launcher.searchUrl !== "string"
                             || !/^https?:\/\/\S*\{query\}\S*$/i.test(launcher.searchUrl)))
                         || !performance
@@ -245,8 +241,6 @@ Singleton {
                 root.tlpChargeModes = tlpChargeModes
                 root.reduceBrightnessInEco = powerProfile.reduceBrightnessInEco
                 root.controlPanelDefaultMode = controlPanel.defaultMode
-                if (updates)
-                    root.updateApplicationCommand = updates.applicationCommand
                 if (launcher)
                     root.launcherSearchUrl = launcher.searchUrl
                 root.ecoSettings = eco
