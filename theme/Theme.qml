@@ -43,10 +43,11 @@ Singleton {
     property bool reduceBrightnessInEco: true
     property string controlPanelDefaultMode: "notifications"
     property string launcherSearchUrl: "https://duckduckgo.com/?q={query}"
-    property string barWifiApplication: "nm-connection-editor"
+    property string wifiApplication: "nm-connection-editor"
     property string barWifiRightClick: "toggle"
-    property string barBluetoothApplication: "blueman-manager"
+    property string bluetoothApplication: "blueman-manager"
     property string barBluetoothRightClick: "toggle"
+    property string fileManagerApplication: "dolphin"
     property var ecoSettings: ({
         ecoVolume: 30,
         ecoBrightness: 30,
@@ -70,7 +71,7 @@ Singleton {
     Behavior on buttonHover { ColorAnimation { duration: 240 } }
 
     property string wallpaper: ""
-    readonly property string wallpaperDir: Quickshell.env("HOME") + "/Pictures/wallpapers"
+    property string wallpaperDir: Quickshell.env("HOME") + "/Pictures/wallpapers"
     readonly property string wallpaperScript: Quickshell.env("HOME") + "/.config/quickshell/scripts/wallpaper.sh"
 
     readonly property int barHeight: 30
@@ -178,11 +179,13 @@ Singleton {
                 const controlPanel = config.controlPanel
                 const performance = config.performance
                 const powerProfile = config.powerProfile
+                const wallpaperConfig = config.wallpaper
                 const updates = config.updates
                 const launcher = config.launcher
-                const bar = config.bar
-                const wifiBar = bar?.wifi
-                const bluetoothBar = bar?.bluetooth
+                const panel = config.panel || config.bar
+                const wifiPanel = panel?.wifi
+                const bluetoothPanel = panel?.bluetooth
+                const apps = config.apps
                 const tlpChargeModes = powerProfile?.tlpChargeModes || root.tlpChargeModes
                 const weather = widgets?.weather
                 const eco = config.eco
@@ -197,15 +200,17 @@ Singleton {
                         || !controlPanel || !["notifications", "both"].includes(controlPanel.defaultMode)
                         || (launcher && (typeof launcher.searchUrl !== "string"
                             || !/^https?:\/\/\S*\{query\}\S*$/i.test(launcher.searchUrl)))
-                        || (bar && (!wifiBar || !bluetoothBar
-                            || (wifiBar.application !== undefined
-                                && (typeof wifiBar.application !== "string" || wifiBar.application.trim() === ""))
-                            || (bluetoothBar.application !== undefined
-                                && (typeof bluetoothBar.application !== "string" || bluetoothBar.application.trim() === ""))
-                            || (wifiBar.rightClick !== undefined
-                                && !["toggle", "none"].includes(wifiBar.rightClick))
-                            || (bluetoothBar.rightClick !== undefined
-                                && !["toggle", "none"].includes(bluetoothBar.rightClick))))
+                        || (panel && (!wifiPanel || !bluetoothPanel
+                            || (wifiPanel.rightClick !== undefined
+                                && !["toggle", "none"].includes(wifiPanel.rightClick))
+                            || (bluetoothPanel.rightClick !== undefined
+                                && !["toggle", "none"].includes(bluetoothPanel.rightClick))))
+                        || (apps && !["wifi", "bluetooth", "fileManager"].every(k =>
+                            typeof apps[k] === "string" && apps[k].trim() !== ""))
+                        || (wallpaperConfig && (typeof wallpaperConfig.directory !== "string"
+                            || wallpaperConfig.directory.trim() === ""
+                            || (!wallpaperConfig.directory.startsWith("/")
+                                && !wallpaperConfig.directory.startsWith("~/"))))
                         || !performance
                         || !powerProfile
                         || typeof powerProfile.batteryFallbackEnabled !== "boolean"
@@ -259,12 +264,15 @@ Singleton {
                 root.controlPanelDefaultMode = controlPanel.defaultMode
                 if (launcher)
                     root.launcherSearchUrl = launcher.searchUrl
-                if (bar) {
-                    root.barWifiApplication = wifiBar.application || "nm-connection-editor"
-                    root.barWifiRightClick = wifiBar.rightClick || "toggle"
-                    root.barBluetoothApplication = bluetoothBar.application || "blueman-manager"
-                    root.barBluetoothRightClick = bluetoothBar.rightClick || "toggle"
-                }
+                root.wifiApplication = apps?.wifi || wifiPanel?.application || "nm-connection-editor"
+                root.barWifiRightClick = wifiPanel?.rightClick || "toggle"
+                root.bluetoothApplication = apps?.bluetooth || bluetoothPanel?.application || "blueman-manager"
+                root.barBluetoothRightClick = bluetoothPanel?.rightClick || "toggle"
+                root.fileManagerApplication = apps?.fileManager || "dolphin"
+                const wallpaperDirectory = wallpaperConfig?.directory || "~/Pictures/wallpapers"
+                root.wallpaperDir = wallpaperDirectory.startsWith("~/")
+                    ? Quickshell.env("HOME") + wallpaperDirectory.slice(1)
+                    : wallpaperDirectory
                 root.ecoSettings = eco
                 root.wallpaperPaletteLabels = labels
                 root.configRevision++

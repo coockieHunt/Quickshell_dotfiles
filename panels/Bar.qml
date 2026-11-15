@@ -129,8 +129,12 @@ Scope {
                         label: "wallpaper"
                         tooltip: "Clic gauche : ouvrir le sélecteur\nClic droit : fond aléatoire\nClic molette : supprimer l’actuel"
                         onClicked: barRoot.wallpaperPicker.toggle()
-                        onRightClicked: Quickshell.execDetached([Theme.wallpaperScript, "random"])
-                        onMiddleClicked: Quickshell.execDetached([Theme.wallpaperScript, "delete-current"])
+                        onRightClicked: Quickshell.execDetached([
+                            Theme.wallpaperScript, "--directory", Theme.wallpaperDir, "random"
+                        ])
+                        onMiddleClicked: Quickshell.execDetached([
+                            Theme.wallpaperScript, "--directory", Theme.wallpaperDir, "delete-current"
+                        ])
                     }
                     BarButton {
                         label: "fullscreen"
@@ -385,7 +389,7 @@ Scope {
                             id: wifiButton
                             label: "wifi"
                             anchors.fill: parent
-                            onClicked: barRoot.popup(Theme.barWifiApplication)
+                            onClicked: barRoot.popup(Theme.wifiApplication)
                             onRightClicked: {
                                 if (Theme.barWifiRightClick === "toggle")
                                     barRoot.notificationControl.toggleWifi()
@@ -431,7 +435,7 @@ Scope {
                             id: bluetoothButton
                             label: "bluetooth"
                             anchors.fill: parent
-                            onClicked: barRoot.popup(Theme.barBluetoothApplication)
+                            onClicked: barRoot.popup(Theme.bluetoothApplication)
                             onRightClicked: {
                                 if (Theme.barBluetoothRightClick === "toggle")
                                     barRoot.notificationControl.toggleBluetooth()

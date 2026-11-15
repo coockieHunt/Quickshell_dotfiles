@@ -33,7 +33,9 @@ PanelWindow {
 
     Process {
         id: deleteProcess
-        command: [Theme.wallpaperScript, "delete", root.wallpaperToDelete]
+        command: [
+            Theme.wallpaperScript, "--directory", Theme.wallpaperDir, "delete", root.wallpaperToDelete
+        ]
 
         onExited: (exitCode, exitStatus) => {
             if (exitCode === 0) {
@@ -43,7 +45,9 @@ PanelWindow {
                 }
                 root.wallpaperToDelete = ""
                 if (root.deletingCurrentWallpaper)
-                    Quickshell.execDetached([Theme.wallpaperScript, "random"])
+                    Quickshell.execDetached([
+                        Theme.wallpaperScript, "--directory", Theme.wallpaperDir, "random"
+                    ])
                 root.deletingCurrentWallpaper = false
             } else {
                 root.deletionError = "La suppression du fond d’écran a échoué."
@@ -261,7 +265,9 @@ PanelWindow {
                             }
                         }
                         onClicked: {
-                            Quickshell.execDetached([Theme.wallpaperScript, "set", filePath])
+                            Quickshell.execDetached([
+                                Theme.wallpaperScript, "--directory", Theme.wallpaperDir, "set", filePath
+                            ])
                             root.visible = false
                         }
                     }
@@ -302,7 +308,9 @@ PanelWindow {
                         label: "shuffle"
                         tooltip: "Choisir un fond d’écran au hasard"
                         onClicked: {
-                            Quickshell.execDetached([Theme.wallpaperScript, "random"])
+                            Quickshell.execDetached([
+                                Theme.wallpaperScript, "--directory", Theme.wallpaperDir, "random"
+                            ])
                             root.visible = false
                         }
                     }
@@ -312,7 +320,7 @@ PanelWindow {
                         label: "folder_open"
                         tooltip: "Ouvrir le dossier des fonds d’écran"
                         onClicked: {
-                            Quickshell.execDetached(["xdg-open", Theme.wallpaperDir])
+                            Quickshell.execDetached([Theme.fileManagerApplication, Theme.wallpaperDir])
                             root.visible = false
                         }
                     }

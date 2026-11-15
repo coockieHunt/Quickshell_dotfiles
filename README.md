@@ -225,7 +225,8 @@ be used to change:
 - Refresh intervals
 - Weather coordinates
 - Default control-panel view
-- Wi-Fi and Bluetooth bar button applications and right-click actions
+- Wi-Fi, Bluetooth, and file-manager applications
+- Wi-Fi and Bluetooth bar right-click actions
 - Update manager command
 - Power fallback settings
 - Eco levels
@@ -234,11 +235,19 @@ be used to change:
 [`create-config.sh`](./create-config.sh) creates a default `config.jsonc` if
 one does not already exist. If the file already exists, it leaves it untouched.
 
-Under `bar.wifi` and `bar.bluetooth`, set `application` to the app opened by a
-left-click. Set `rightClick` to `"toggle"` to enable/disable the connection
-with a right-click, or `"none"` to disable the right-click action.
+Set applications in the `apps` category: `wifi`, `bluetooth`, and
+`fileManager`. Set bar right-click actions in `panel.wifi.rightClick` and
+`panel.bluetooth.rightClick` to `"toggle"` to enable/disable the connection, or
+`"none"` to disable the action. Older configurations using `bar` with
+`application` values are still supported.
 
-The wallpaper picker reads images from:
+Dolphin is used by default to open the wallpaper folder and the launcher's
+custom applications folder. Set `apps.fileManager` to change it. Configure the
+wallpaper folder with `wallpaper.directory`; it accepts an absolute path or a
+path starting with `~/`. The picker, bar actions, and wallpaper script all use
+this directory.
+
+By default, the wallpaper picker reads images from:
 
 ```text
 ~/Pictures/wallpapers

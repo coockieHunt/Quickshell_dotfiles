@@ -5,6 +5,17 @@ set -euo pipefail
 wallpaper_dir="${HOME}/Pictures/wallpapers"
 current_file="${HOME}/.cache/qs-wallpaper"
 
+if [[ "${1:-}" == "--directory" ]]; then
+    if [[ $# -lt 3 || -z "$2" ]]; then
+        printf 'Usage: %s [--directory <directory>] set <wallpaper> | delete <wallpaper> | delete-current | random\n' "$0" >&2
+        exit 2
+    fi
+    wallpaper_dir=$2
+    shift 2
+fi
+
+action="${1:-}"
+
 apply_wallpaper() {
     local wallpaper=$1
     if [[ ! -f "$wallpaper" ]]; then
@@ -53,7 +64,7 @@ delete_wallpaper() {
     fi
 }
 
-case "${1:-}" in
+case "$action" in
     set)
         if [[ $# -ne 2 ]]; then
             printf 'Usage: %s set <wallpaper> | delete <wallpaper> | random\n' "$0" >&2
@@ -84,7 +95,7 @@ case "${1:-}" in
         fi
 
         delete_wallpaper "$current_wallpaper"
-        "$0" random
+        "$0" --directory "$wallpaper_dir" random
         ;;
     random)
         if [[ $# -ne 1 ]]; then

@@ -297,7 +297,8 @@ PanelWindow {
                         label: "folder_open"
                         tooltip: "Ouvrir les lanceurs personnalisés"
                         onClicked: Quickshell.execDetached([
-                            Quickshell.env("HOME") + "/.config/quickshell/scripts/open-user-applications.sh"
+                            Quickshell.env("HOME") + "/.config/quickshell/scripts/open-user-applications.sh",
+                            Theme.fileManagerApplication
                         ])
                     }
                 }

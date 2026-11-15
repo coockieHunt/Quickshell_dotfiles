@@ -29,13 +29,16 @@ if ! (set -o noclobber; cat > "$config_file" <<'EOF'
   "launcher": {
     "searchUrl": "https://duckduckgo.com/?q={query}"
   },
-  "bar": {
+  "apps": {
+    "wifi": "nm-connection-editor",
+    "bluetooth": "blueman-manager",
+    "fileManager": "dolphin"
+  },
+  "panel": {
     "wifi": {
-      "application": "nm-connection-editor",
       "rightClick": "toggle"
     },
     "bluetooth": {
-      "application": "blueman-manager",
       "rightClick": "toggle"
     }
   },
@@ -71,6 +74,9 @@ if ! (set -o noclobber; cat > "$config_file" <<'EOF'
     },
     "statsRefreshSeconds": 2,
     "networkRefreshSeconds": 20
+  },
+  "wallpaper": {
+    "directory": "~/Pictures/wallpapers"
   },
   "eco": {
     "ecoVolume": 30,
