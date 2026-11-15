@@ -79,7 +79,7 @@ PanelWindow {
         else if (action === "logout")
             Quickshell.execDetached(["bash", "-c", "command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"])
         else if (action === "lock")
-            Quickshell.execDetached(["bash", "-c", "exec \"$HOME/.config/quickshell/scripts/lock-safe.sh\""])
+            Quickshell.execDetached(["hyprlock"])
         else if (action === "reboot")
             Quickshell.execDetached(["systemctl", "reboot"])
         else

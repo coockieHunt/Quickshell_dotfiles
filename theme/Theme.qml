@@ -43,6 +43,10 @@ Singleton {
     property bool reduceBrightnessInEco: true
     property string controlPanelDefaultMode: "notifications"
     property string launcherSearchUrl: "https://duckduckgo.com/?q={query}"
+    property string barWifiApplication: "nm-connection-editor"
+    property string barWifiRightClick: "toggle"
+    property string barBluetoothApplication: "blueman-manager"
+    property string barBluetoothRightClick: "toggle"
     property var ecoSettings: ({
         ecoVolume: 30,
         ecoBrightness: 30,
@@ -176,6 +180,9 @@ Singleton {
                 const powerProfile = config.powerProfile
                 const updates = config.updates
                 const launcher = config.launcher
+                const bar = config.bar
+                const wifiBar = bar?.wifi
+                const bluetoothBar = bar?.bluetooth
                 const tlpChargeModes = powerProfile?.tlpChargeModes || root.tlpChargeModes
                 const weather = widgets?.weather
                 const eco = config.eco
@@ -190,6 +197,15 @@ Singleton {
                         || !controlPanel || !["notifications", "both"].includes(controlPanel.defaultMode)
                         || (launcher && (typeof launcher.searchUrl !== "string"
                             || !/^https?:\/\/\S*\{query\}\S*$/i.test(launcher.searchUrl)))
+                        || (bar && (!wifiBar || !bluetoothBar
+                            || (wifiBar.application !== undefined
+                                && (typeof wifiBar.application !== "string" || wifiBar.application.trim() === ""))
+                            || (bluetoothBar.application !== undefined
+                                && (typeof bluetoothBar.application !== "string" || bluetoothBar.application.trim() === ""))
+                            || (wifiBar.rightClick !== undefined
+                                && !["toggle", "none"].includes(wifiBar.rightClick))
+                            || (bluetoothBar.rightClick !== undefined
+                                && !["toggle", "none"].includes(bluetoothBar.rightClick))))
                         || !performance
                         || !powerProfile
                         || typeof powerProfile.batteryFallbackEnabled !== "boolean"
@@ -243,6 +259,12 @@ Singleton {
                 root.controlPanelDefaultMode = controlPanel.defaultMode
                 if (launcher)
                     root.launcherSearchUrl = launcher.searchUrl
+                if (bar) {
+                    root.barWifiApplication = wifiBar.application || "nm-connection-editor"
+                    root.barWifiRightClick = wifiBar.rightClick || "toggle"
+                    root.barBluetoothApplication = bluetoothBar.application || "blueman-manager"
+                    root.barBluetoothRightClick = bluetoothBar.rightClick || "toggle"
+                }
                 root.ecoSettings = eco
                 root.wallpaperPaletteLabels = labels
                 root.configRevision++

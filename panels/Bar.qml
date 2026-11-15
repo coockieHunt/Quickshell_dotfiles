@@ -384,9 +384,12 @@ Scope {
                         BarButton {
                             id: wifiButton
                             label: "wifi"
-                            tooltip: ""
                             anchors.fill: parent
-                            onClicked: barRoot.popup("nm-connection-editor")
+                            onClicked: barRoot.popup(Theme.barWifiApplication)
+                            onRightClicked: {
+                                if (Theme.barWifiRightClick === "toggle")
+                                    barRoot.notificationControl.toggleWifi()
+                            }
                         }
 
                         Rectangle {
@@ -427,9 +430,12 @@ Scope {
                         BarButton {
                             id: bluetoothButton
                             label: "bluetooth"
-                            tooltip: ""
                             anchors.fill: parent
-                            onClicked: barRoot.popup("blueman-manager")
+                            onClicked: barRoot.popup(Theme.barBluetoothApplication)
+                            onRightClicked: {
+                                if (Theme.barBluetoothRightClick === "toggle")
+                                    barRoot.notificationControl.toggleBluetooth()
+                            }
                         }
 
                         Rectangle {

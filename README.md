@@ -159,6 +159,7 @@ Common utilities:
 - `notify-send`
 - `systemctl`
 - `hyprctl`
+- `hyprlock`
 
 For power management:
 
@@ -175,7 +176,7 @@ Optional integrations:
 - `nm-connection-editor`
 - `xdg-open`
 - `hyprshutdown`
-- A Quickshell-compatible lock screen at `~/.local/share/quickshell-lockscreen`
+- [Thyx](https://github.com/rccyx/thyx), an SDDM login theme (not a session lock screen)
 
 A wallpaper collection is expected in:
 
@@ -224,6 +225,7 @@ be used to change:
 - Refresh intervals
 - Weather coordinates
 - Default control-panel view
+- Wi-Fi and Bluetooth bar button applications and right-click actions
 - Update manager command
 - Power fallback settings
 - Eco levels
@@ -231,6 +233,10 @@ be used to change:
 
 [`create-config.sh`](./create-config.sh) creates a default `config.jsonc` if
 one does not already exist. If the file already exists, it leaves it untouched.
+
+Under `bar.wifi` and `bar.bluetooth`, set `application` to the app opened by a
+left-click. Set `rightClick` to `"toggle"` to enable/disable the connection
+with a right-click, or `"none"` to disable the right-click action.
 
 The wallpaper picker reads images from:
 
@@ -364,8 +370,8 @@ Loads the JSONC configuration and generated wallpaper colors.
 scripts/
 ```
 
-Wallpaper, TLP power-profile, lock-screen, desktop-entry-folder helpers, and
-desktop-entry and keyboard-binding parsers.
+Wallpaper, TLP power-profile, desktop-entry-folder helpers, and desktop-entry
+and keyboard-binding parsers.
 
 ---
 
