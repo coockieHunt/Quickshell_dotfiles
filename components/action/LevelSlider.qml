@@ -1,7 +1,7 @@
 // Used by: 1 file(s)
 import QtQuick
 import QtQuick.Controls
-import "../theme"
+import "../../theme"
 
 Row {
     id: root

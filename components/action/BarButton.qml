@@ -1,6 +1,7 @@
 // Used by: 5 file(s)
 import QtQuick
-import "../theme"
+import "../info"
+import "../../theme"
 
 Rectangle {
     id: root

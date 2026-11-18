@@ -4,8 +4,10 @@ import Quickshell.Io
 import Quickshell.Wayland
 import Qt.labs.folderlistmodel
 import QtQuick
-import "../components"
-import "../theme"
+import "../../components"
+import "../../components/action"
+import "../../components/info"
+import "../../theme"
 
 PanelWindow {
     id: root

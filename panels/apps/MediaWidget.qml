@@ -5,8 +5,9 @@ import Quickshell.Services.Mpris
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Effects
-import "../components"
-import "../theme"
+import "../../components"
+import "../../components/action"
+import "../../theme"
 
 Item {
     id: root

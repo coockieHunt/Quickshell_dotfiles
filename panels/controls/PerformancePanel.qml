@@ -1,8 +1,9 @@
 // Used by: 1 file(s)
 import QtQuick
 import Quickshell.Io
-import "../components"
-import "../theme"
+import "../../components"
+import "../../components/info"
+import "../../theme"
 
 Item {
     id: root

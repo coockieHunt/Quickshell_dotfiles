@@ -3,8 +3,9 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import QtQuick
-import "../components"
-import "../theme"
+import "../../components"
+import "../../components/action"
+import "../../theme"
 
 PanelWindow {
     id: root

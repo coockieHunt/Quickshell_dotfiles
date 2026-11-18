@@ -1,8 +1,8 @@
 // Used by: 1 file(s)
 import Quickshell.Io
 import QtQuick
-import "../components"
-import "../theme"
+import "../../components"
+import "../../theme"
 
 Row {
     id: root

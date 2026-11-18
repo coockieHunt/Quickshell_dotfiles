@@ -6,8 +6,10 @@ import Quickshell.Services.Notifications
 import Quickshell.Services.Pipewire
 import Quickshell.Services.UPower
 import QtQuick
-import "../components"
-import "../theme"
+import "../../components"
+import "../../components/notification"
+import "../../theme"
+import "../controls"
 
 Scope {
     id: root

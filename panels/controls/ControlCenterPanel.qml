@@ -1,8 +1,11 @@
 // Used by: 1 file(s)
 import QtQuick
 import QtQuick.Controls
-import "../components"
-import "../theme"
+import "../../components"
+import "../../components/action"
+import "../../components/notification"
+import "../../theme"
+import "../shell"
 
 Item {
     id: root

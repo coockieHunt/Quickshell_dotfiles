@@ -4,7 +4,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.Pipewire
 import QtQuick
-import "../theme"
+import "../../theme"
 
 Scope {
     id: root

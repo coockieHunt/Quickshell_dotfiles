@@ -1,7 +1,7 @@
 // Used by: 2 file(s)
 import QtQuick
 import Quickshell
-import "../theme"
+import "../../theme"
 
 PopupWindow {
     id: root

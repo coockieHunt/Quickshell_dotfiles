@@ -335,8 +335,8 @@ hardware and kernel expose.
 
 When using this setup on another machine, check:
 
-- `panels/Notifications.qml`
-- `components/PowerSlider.qml`
+- `panels/notifications/Notifications.qml`
+- `components/action/PowerSlider.qml`
 - `scripts/`
 
 Some paths and commands may need to be changed depending on the installation.
@@ -363,11 +363,17 @@ panels/
 Bar, widgets, launcher, control center, notifications, performance, wallpaper,
 OSD, power, and keyboard-shortcut interfaces.
 
+The files are grouped into `apps/`, `controls/`, `desktop/`, `notifications/`,
+`services/`, and `shell/`.
+
 ```text
 components/
 ```
 
 Reusable UI components.
+
+The components are grouped into `action/`, `info/`, `notification/`, and
+`tooltip/`.
 
 ```text
 theme/Theme.qml

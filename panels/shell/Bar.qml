@@ -7,10 +7,13 @@ import Quickshell.Services.UPower
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
 import QtQuick
-import "../components"
-import "../components/tooltip"
-import "../components/tooltip"
-import "../theme"
+import "../../components"
+import "../../components/action"
+import "../../components/info"
+import "../../components/tooltip"
+import "../../theme"
+import "../apps"
+import "../controls"
 
 Scope {
     id: barRoot

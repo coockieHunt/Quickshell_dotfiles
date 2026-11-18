@@ -3,7 +3,7 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
 import QtQuick
-import "../theme"
+import "../../theme"
 
 Scope {
     id: root

@@ -2,7 +2,7 @@
 import Quickshell
 import Quickshell.Wayland
 import QtQuick
-import "../theme"
+import "../../theme"
 
 Variants {
     model: Quickshell.screens

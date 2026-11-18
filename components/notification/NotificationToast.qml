@@ -1,7 +1,7 @@
 // Used by: 1 file(s)
 import Quickshell.Services.Notifications
 import QtQuick
-import "../theme"
+import "../../theme"
 
 Rectangle {
     id: root
