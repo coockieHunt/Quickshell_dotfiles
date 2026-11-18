@@ -24,7 +24,7 @@ Scope {
 
     Loader {
         id: keybindingParser
-        source: Qt.resolvedUrl("../scripts/KeybindingParser.qml")
+        source: Qt.resolvedUrl("../../scripts/KeybindingParser.qml")
         onLoaded: root.updateKeybindings(root.keybindingContents)
     }
 
