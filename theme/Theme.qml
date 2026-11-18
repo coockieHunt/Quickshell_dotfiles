@@ -48,6 +48,8 @@ Singleton {
     property string bluetoothApplication: "blueman-manager"
     property string barBluetoothRightClick: "toggle"
     property string fileManagerApplication: "dolphin"
+    property string textEditorApplication: "kate"
+    readonly property string configFilePath: Quickshell.env("HOME") + "/.config/quickshell/config.jsonc"
     property var ecoSettings: ({
         ecoVolume: 30,
         ecoBrightness: 30,
@@ -162,7 +164,7 @@ Singleton {
 
     FileView {
         id: configFile
-        path: Quickshell.env("HOME") + "/.config/quickshell/config.jsonc"
+        path: root.configFilePath
         watchChanges: true
         onFileChanged: reload()
         onLoaded: {
@@ -269,6 +271,7 @@ Singleton {
                 root.bluetoothApplication = apps?.bluetooth || bluetoothPanel?.application || "blueman-manager"
                 root.barBluetoothRightClick = bluetoothPanel?.rightClick || "toggle"
                 root.fileManagerApplication = apps?.fileManager || "dolphin"
+                root.textEditorApplication = apps?.textEditor || "kate"
                 const wallpaperDirectory = wallpaperConfig?.directory || "~/Pictures/wallpapers"
                 root.wallpaperDir = wallpaperDirectory.startsWith("~/")
                     ? Quickshell.env("HOME") + wallpaperDirectory.slice(1)

@@ -1,6 +1,8 @@
 // Used by: 1 file(s)
 import QtQuick
 import QtQuick.Controls
+import Quickshell
+import Quickshell.Io
 import "../../components"
 import "../../components/action"
 import "../../components/notification"
@@ -11,6 +13,28 @@ Item {
     id: root
 
     required property var controller
+
+    Process {
+        id: openConfigWithDefaultApp
+        command: ["xdg-open", Theme.configFilePath]
+
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode !== 0) {
+                console.warn("Opening config.jsonc with the default application failed:", exitCode, exitStatus)
+                openConfigWithEditor.running = true
+            }
+        }
+    }
+
+    Process {
+        id: openConfigWithEditor
+        command: [Theme.textEditorApplication, Theme.configFilePath]
+
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode !== 0)
+                console.warn("Opening config.jsonc with the configured text editor failed:", exitCode, exitStatus)
+        }
+    }
 
     Rectangle {
         visible: controller.panelMode !== "performance"
@@ -36,34 +60,53 @@ Item {
             anchors.margins: Theme.margin
             spacing: Theme.spacing
 
-            Item {
-                width: parent.width
-                height: 28
+        Item {
+            width: parent.width
+            height: 28
 
-                Text {
-                    anchors.left: parent.left
-                    anchors.right: macroButton.left
-                    anchors.rightMargin: Theme.spacing
-                    text: "Centre de contrôle"
-                    color: Theme.text
-                    font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontSize + 2
-                    font.weight: Font.DemiBold
-                    verticalAlignment: Text.AlignVCenter
-                }
+            Text {
+                anchors.left: parent.left
+                anchors.right: settingsButton.left
+                anchors.rightMargin: Theme.spacing
 
-                BarButton {
-                    id: macroButton
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    label: "keyboard"
-                    tooltip: "Afficher les raccourcis clavier"
-                    onClicked: {
-                        controller.panelOpen = false
-                        controller.macroControl.openPanel()
-                    }
+                text: "Centre de contrôle"
+                color: Theme.text
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize + 2
+                font.weight: Font.DemiBold
+                verticalAlignment: Text.AlignVCenter
+            }
+
+            BarButton {
+                id: macroButton
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+
+                label: "keyboard"
+                tooltip: "Afficher les raccourcis clavier"
+
+                onClicked: {
+                    controller.panelOpen = false
+                    controller.macroControl.openPanel()
                 }
             }
+
+            BarButton {
+                id: settingsButton
+                anchors.right: macroButton.left
+                anchors.rightMargin: Theme.spacing
+                anchors.verticalCenter: parent.verticalCenter
+
+                label: "settings"
+                tooltip: "Ouvrir les paramètres"
+
+                onClicked: {
+                    controller.panelOpen = false
+                    openConfigWithDefaultApp.running = true
+                }
+            }
+        }
+
 
             Row {
                 width: parent.width

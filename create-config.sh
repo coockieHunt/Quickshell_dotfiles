@@ -32,7 +32,8 @@ if ! (set -o noclobber; cat > "$config_file" <<'EOF'
   "apps": {
     "wifi": "nm-connection-editor",
     "bluetooth": "blueman-manager",
-    "fileManager": "dolphin"
+    "fileManager": "dolphin",
+    "textEditor": "kate"
   },
   "panel": {
     "wifi": {

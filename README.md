@@ -225,7 +225,7 @@ be used to change:
 - Refresh intervals
 - Weather coordinates
 - Default control-panel view
-- Wi-Fi, Bluetooth, and file-manager applications
+- Wi-Fi, Bluetooth, file-manager, and fallback text-editor applications
 - Wi-Fi and Bluetooth bar right-click actions
 - Update manager command
 - Power fallback settings
@@ -235,8 +235,10 @@ be used to change:
 [`create-config.sh`](./create-config.sh) creates a default `config.jsonc` if
 one does not already exist. If the file already exists, it leaves it untouched.
 
-Set applications in the `apps` category: `wifi`, `bluetooth`, and
-`fileManager`. Set bar right-click actions in `panel.wifi.rightClick` and
+Set applications in the `apps` category: `wifi`, `bluetooth`, `fileManager`,
+and `textEditor`. The settings button first opens `config.jsonc` with the
+system's default application and falls back to `apps.textEditor` if that fails.
+Set bar right-click actions in `panel.wifi.rightClick` and
 `panel.bluetooth.rightClick` to `"toggle"` to enable/disable the connection, or
 `"none"` to disable the action. Older configurations using `bar` with
 `application` values are still supported.
