@@ -3,13 +3,13 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Services.UPower
 import QtQuick
+import "../../theme"
 
 
 Scope {
     id: root
     property bool ready: false
     property bool lowWarned: false
-    readonly property string soundDir: "/usr/share/sounds/freedesktop/stereo/"
 
     Timer {
         interval: 2000
@@ -18,8 +18,11 @@ Scope {
     }
 
 
-    function playSound(file) {
-        Quickshell.execDetached(["pw-play", soundDir + file])
+    // event : plug, unplug, batteryLow, usbAdd, usbRemove (voir watchers.sounds dans config.jsonc)
+    function playSound(event) {
+        const path = Theme.soundPath(event)
+        if (path !== "")
+            Quickshell.execDetached(["pw-play", path])
     }
 
     function notify(title, body, urgency) {
@@ -31,10 +34,10 @@ Scope {
         function onOnBatteryChanged() {
             if (!root.ready) return
             if (UPower.onBattery) {
-                root.playSound("power-unplug.oga")
+                root.playSound("unplug")
                 root.notify("Chargeur débranché", "Sur batterie")
-            }else{
-                root.playSound("power-plug.oga")
+            } else {
+                root.playSound("plug")
                 root.notify("Chargeur branché", "Système d'alimentation")
             }
         }
@@ -46,6 +49,7 @@ Scope {
             const pct = Math.round(UPower.displayDevice.percentage * 100)
             if (pct <= 15 && UPower.onBattery && !root.lowWarned) {
                 root.lowWarned = true
+                root.playSound("batteryLow")
                 root.notify("Batterie faible", pct + " % restant", "critical")
             } else if (pct > 20) {
                 root.lowWarned = false
@@ -73,9 +77,15 @@ Scope {
                 const m = dbModel !== "" ? dbModel : model
                 const n = ((vendor !== "" ? vendor + " " : "") + m).trim() || "Périphérique USB"
                 known[devpath] = n
-                if (root.ready) root.notify("USB branché", n)
+                if (root.ready) {
+                    root.playSound("usbAdd")
+                    root.notify("USB branché", n)
+                }
             } else if (action === "remove" && known[devpath] !== undefined) {
-                if (root.ready) root.notify("USB débranché", known[devpath])
+                if (root.ready) {
+                    root.playSound("usbRemove")
+                    root.notify("USB débranché", known[devpath])
+                }
                 delete known[devpath]
             }
             action = ""; devpath = ""; model = ""; dbModel = ""
@@ -83,7 +93,6 @@ Scope {
         }
 
         stdout: SplitParser {
-            
             onRead: line => {
                 if (line.startsWith("UDEV")) usbMonitor.flush()
                 else if (line.startsWith("ACTION=")) usbMonitor.action = line.substring(7)

@@ -63,7 +63,27 @@ Singleton {
         secondary: "Secondaire",
         tertiary: "Tertiaire"
     })
+
+    // Sons des watchers (batterie, chargeur, USB)
+    property string soundDir: "/usr/share/sounds/freedesktop/stereo"
+    property string soundExt: "oga"
+    property var sounds: ({
+        plug: "power-plug",
+        unplug: "power-unplug",
+        batteryLow: "battery-low",
+        usbAdd: "device-added",
+        usbRemove: "device-removed"
+    })
+
     property int configRevision: 0
+
+    // Renvoie le chemin complet du son pour un événement, ou "" si désactivé
+    function soundPath(event) {
+        const name = root.sounds[event]
+        if (!name) return ""
+        if (name.startsWith("/")) return name
+        return root.soundDir.replace(/\/+$/, "") + "/" + name + "." + root.soundExt
+    }
 
     Behavior on bg { ColorAnimation { duration: 240 } }
     Behavior on surface { ColorAnimation { duration: 240 } }
@@ -187,6 +207,7 @@ Singleton {
                 const wallpaperConfig = config.wallpaper
                 const updates = config.updates
                 const launcher = config.launcher
+                const watchers = config.watchers
                 const panel = config.panel || config.bar
                 const wifiPanel = panel?.wifi
                 const bluetoothPanel = panel?.bluetooth
@@ -207,6 +228,11 @@ Singleton {
                         || !controlPanel || !["notifications", "both"].includes(controlPanel.defaultMode)
                         || (launcher && (typeof launcher.searchUrl !== "string"
                             || !/^https?:\/\/\S*\{query\}\S*$/i.test(launcher.searchUrl)))
+                        || (watchers && (typeof watchers.soundDir !== "string"
+                            || watchers.soundDir.trim() === ""
+                            || typeof watchers.soundExt !== "string"
+                            || !watchers.sounds || typeof watchers.sounds !== "object"
+                            || !Object.keys(watchers.sounds).every(k => typeof watchers.sounds[k] === "string")))
                         || (panel && (!wifiPanel || !bluetoothPanel
                             || (wifiPanel.rightClick !== undefined
                                 && !["toggle", "none"].includes(wifiPanel.rightClick))
@@ -277,6 +303,13 @@ Singleton {
                 root.controlPanelDefaultMode = controlPanel.defaultMode
                 if (launcher)
                     root.launcherSearchUrl = launcher.searchUrl
+                if (watchers) {
+                    root.soundDir = watchers.soundDir.startsWith("~/")
+                        ? Quickshell.env("HOME") + watchers.soundDir.slice(1)
+                        : watchers.soundDir
+                    root.soundExt = watchers.soundExt.replace(/^\./, "")
+                    root.sounds = watchers.sounds
+                }
                 root.wifiApplication = apps?.wifi || wifiPanel?.application || "nm-connection-editor"
                 root.barWifiRightClick = wifiPanel?.rightClick || "toggle"
                 root.bluetoothApplication = apps?.bluetooth || bluetoothPanel?.application || "blueman-manager"

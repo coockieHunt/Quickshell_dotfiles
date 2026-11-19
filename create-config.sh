@@ -21,6 +21,19 @@ if ! (set -o noclobber; cat > "$config_file" <<'EOF'
         "buttonHover": "#262b2e",
     },
 
+    // Defines song of triger usb/bat/charge ....
+    "watchers": {
+        "soundDir": "/usr/share/sounds/freedesktop/stereo",
+        "soundExt": "oga",
+        "sounds": {
+            "plug": "power-plug",
+            "unplug": "power-unplug",
+            "batteryLow": "battery-low",
+            "usbAdd": "device-added",
+            "usbRemove": "device-removed"
+        }    
+    }
+
     // Defines global fonts and sizes.
     "fonts": {
         "text": "sans-serif",
