@@ -82,10 +82,13 @@ Singleton {
     readonly property int workspaceSize: 20
     readonly property int buttonSize: 20
 
-    readonly property string fontFamily: "sans-serif"
-    readonly property int fontSize: 13
-    readonly property string iconFont: "Material Symbols Rounded"
-    readonly property int iconSize: 16
+    property string fontFamily: "sans-serif"
+    property string monoFont: "monospace"
+    property int fontSize: 13
+    property string iconFont: "Material Symbols Rounded"
+    property string brandFont: "JetBrainsMono Nerd Font"
+    property string archLogo: "\uf303"
+    property int iconSize: 16
 
     function parseJsonc(source) {
         let uncommented = ""
@@ -191,9 +194,11 @@ Singleton {
                 const tlpChargeModes = powerProfile?.tlpChargeModes || root.tlpChargeModes
                 const weather = widgets?.weather
                 const eco = config.eco
+                const fonts = config.fonts
                 const labels = config.wallpaperPaletteLabels
                 const labelKeys = ["background", "surface", "primary", "secondary", "tertiary"]
                 const ecoKeys = ["ecoVolume", "ecoBrightness", "normalVolume", "normalBrightness"]
+                const fontKeys = ["text", "mono", "icons", "brand", "logo"]
                 const validPositions = ["top-left", "top-right", "bottom-left", "bottom-right"]
 
                 if (!ui || !Number.isFinite(ui.cornerRadius) || ui.cornerRadius < 0 || ui.cornerRadius > 8
@@ -239,6 +244,12 @@ Singleton {
                         || !Number.isInteger(widgets.statsRefreshSeconds) || widgets.statsRefreshSeconds < 1
                         || !Number.isInteger(widgets.networkRefreshSeconds) || widgets.networkRefreshSeconds < 5
                         || !eco || !ecoKeys.every(k => Number.isFinite(eco[k]) && eco[k] >= 0 && eco[k] <= 100)
+                        || (fonts && !fontKeys.every(k =>
+                            fonts[k] === undefined || (typeof fonts[k] === "string" && fonts[k].trim() !== "")))
+                        || (fonts && fonts.textSize !== undefined
+                            && (!Number.isInteger(fonts.textSize) || fonts.textSize < 8 || fonts.textSize > 32))
+                        || (fonts && fonts.iconSize !== undefined
+                            && (!Number.isInteger(fonts.iconSize) || fonts.iconSize < 8 || fonts.iconSize > 48))
                         || !labels || !labelKeys.every(k => typeof labels[k] === "string" && labels[k].trim() !== "")) {
                     console.warn("config.jsonc: invalid or missing configuration values")
                     return
@@ -278,6 +289,13 @@ Singleton {
                     : wallpaperDirectory
                 root.ecoSettings = eco
                 root.wallpaperPaletteLabels = labels
+                root.fontFamily = fonts?.text || "sans-serif"
+                root.monoFont = fonts?.mono || "monospace"
+                root.iconFont = fonts?.icons || "Material Symbols Rounded"
+                root.brandFont = fonts?.brand || "JetBrainsMono Nerd Font"
+                root.archLogo = fonts?.logo || "\uf303"
+                root.fontSize = fonts?.textSize || 13
+                root.iconSize = fonts?.iconSize || 16
                 root.configRevision++
             } catch (e) {
                 console.warn("Failed to load config.jsonc:", e)

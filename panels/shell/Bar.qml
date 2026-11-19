@@ -20,7 +20,6 @@ Scope {
     required property bool barVisible
     required property var launcherControl
     required property var wallpaperPicker
-    required property var powerMenuControl
     required property var notificationControl
     property var performanceSource: null
     signal hideRequested()
@@ -121,11 +120,10 @@ Scope {
                     }
 
                     BarButton {
-                        label: "\uf303"
-                        iconFont: "JetBrainsMono Nerd Font"
+                        label: Theme.archLogo
+                        iconFont: Theme.brandFont
                         iconColor: Theme.accent
                         iconSize: Theme.iconSize - 2
-                        tooltip: "Ouvrir le lanceur"
                         onClicked: barRoot.launcherControl.toggle()
                     }
                     BarButton {
@@ -140,8 +138,7 @@ Scope {
                         ])
                     }
                     BarButton {
-                        label: "fullscreen"
-                        tooltip: "Masquer la barre"
+                        label: "top_panel_close"
                         onClicked: barRoot.hideRequested()
                     }
                 }
@@ -250,12 +247,6 @@ Scope {
                             cursorShape: Qt.PointingHandCursor
                             onClicked: barRoot.notificationControl.returnToBalancedProfile()
                         }
-
-                        PopupTooltip {
-                            anchorItem: ecoBadge
-                            text: "Cliquer pour revenir au mode équilibré"
-                            shown: ecoBadgeMouse.containsMouse
-                        }
                     }
 
                     Rectangle {
@@ -295,12 +286,6 @@ Scope {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: barRoot.notificationControl.returnToBalancedProfile()
-                        }
-
-                        PopupTooltip {
-                            anchorItem: performanceBadge
-                            text: "Cliquer pour revenir au mode équilibré"
-                            shown: performanceBadgeMouse.containsMouse
                         }
                     }
 
@@ -626,24 +611,22 @@ Scope {
                     }
 
                     BarButton {
-                        label: "settings"
-                        tooltip: "Ouvrir le centre de contrôle"
-                        highlighted: barRoot.notificationControl.panelOpen
-                        onClicked: barRoot.notificationControl.togglePanel()
-                    }
-
-                    BarButton {
                         id: trayButton
                         label: panelWindow.trayPopupOpen ? "expand_less" : "expand_more"
-                        tooltip: "Afficher les icônes de la zone de notification"
                         highlighted: panelWindow.trayPopupOpen
                         onClicked: panelWindow.trayPopupOpen = !panelWindow.trayPopupOpen
                     }
 
                     BarButton {
-                        label: "power_settings_new"
-                        iconColor: Theme.accent
-                        onClicked: barRoot.powerMenuControl.openOn(modelData)
+                        label: "view_cozy"
+                        highlighted: barRoot.notificationControl.panelOpen
+                        onClicked: barRoot.notificationControl.togglePanel()
+                    }
+
+
+                    MoreMenu {
+                        id: moreMenu
+                        hostBar: barRoot
                     }
 
                 }

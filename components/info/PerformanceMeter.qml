@@ -9,7 +9,7 @@ Item {
 
     readonly property int steps: 3
     readonly property var labels: ["Éco", "Équilibré", "Performance"]
-    readonly property var icons: ["󰾬", "󰾅", "󰓅"]
+    readonly property var icons: ["eco", "balance", "bolt"]
 
     readonly property int committed: controller ? controller.powerProfile : 1
     property int dragIndex: -1

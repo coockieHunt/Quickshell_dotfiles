@@ -19,7 +19,7 @@ Row {
     TextMetrics {
         id: barMetrics
 
-        font.family: "monospace"
+        font.family: Theme.monoFont
         font.pixelSize: 12
         text: "-"
     }
@@ -57,7 +57,7 @@ Row {
                 anchors.fill: parent
                 text: "-".repeat(Math.ceil(slider.availableWidth / barMetrics.advanceWidth))
                 color: Theme.componentSurface
-                font.family: "monospace"
+                font.family: Theme.monoFont
                 font.pixelSize: 12
                 font.bold: true
                 horizontalAlignment: Text.AlignLeft
@@ -74,7 +74,7 @@ Row {
                     height: parent.height
                     text: "#".repeat(Math.ceil(slider.availableWidth / barMetrics.advanceWidth))
                     color: slider.enabled ? Theme.accent : Theme.surface
-                    font.family: "monospace"
+                    font.family: Theme.monoFont
                     font.pixelSize: 12
                     font.bold: true
                     horizontalAlignment: Text.AlignLeft

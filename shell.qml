@@ -32,7 +32,6 @@ Scope {
         barVisible: root.barVisible && !notifications.panelOpen
         launcherControl: launcher
         wallpaperPicker: picker
-        powerMenuControl: powerMenu
         notificationControl: notifications
         onHideRequested: root.barVisible = false
     }

@@ -18,9 +18,11 @@ Scope {
 
     function updateKeybindings(contents) {
         keybindingContents = contents
-        if (keybindingParser.status === Loader.Ready)
+        if (keybindingParser.status === Loader.Ready) {
             keybindings = keybindingParser.item.parseKeybindings(contents)
+        }
     }
+
 
     Loader {
         id: keybindingParser
@@ -175,7 +177,7 @@ Scope {
                                                         anchors.centerIn: parent
                                                         text: modelData.shortcut
                                                         color: Theme.accent
-                                                        font.family: "monospace"
+                                                        font.family: Theme.monoFont
                                                         font.pixelSize: Theme.fontSize - 1
                                                         font.weight: Font.DemiBold
                                                         wrapMode: Text.Wrap

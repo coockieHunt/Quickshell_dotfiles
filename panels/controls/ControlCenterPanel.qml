@@ -60,52 +60,23 @@ Item {
             anchors.margins: Theme.margin
             spacing: Theme.spacing
 
-        Item {
-            width: parent.width
-            height: 28
+            Item {
+                width: parent.width
+                height: 28
 
-            Text {
-                anchors.left: parent.left
-                anchors.right: settingsButton.left
-                anchors.rightMargin: Theme.spacing
+                Text {
+                    anchors.left: parent.left
+                    anchors.right: settingsButton.left
+                    anchors.rightMargin: Theme.spacing
 
-                text: "Centre de contrôle"
-                color: Theme.text
-                font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontSize + 2
-                font.weight: Font.DemiBold
-                verticalAlignment: Text.AlignVCenter
-            }
-
-            BarButton {
-                id: macroButton
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-
-                label: "keyboard"
-                tooltip: "Afficher les raccourcis clavier"
-
-                onClicked: {
-                    controller.panelOpen = false
-                    controller.macroControl.openPanel()
+                    text: "Centre de contrôle"
+                    color: Theme.text
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize + 2
+                    font.weight: Font.DemiBold
+                    verticalAlignment: Text.AlignVCenter
                 }
             }
-
-            BarButton {
-                id: settingsButton
-                anchors.right: macroButton.left
-                anchors.rightMargin: Theme.spacing
-                anchors.verticalCenter: parent.verticalCenter
-
-                label: "settings"
-                tooltip: "Ouvrir les paramètres"
-
-                onClicked: {
-                    controller.panelOpen = false
-                    openConfigWithDefaultApp.running = true
-                }
-            }
-        }
 
 
             Row {

@@ -11,87 +11,121 @@ fi
 
 if ! (set -o noclobber; cat > "$config_file" <<'EOF'
 {
-  "theme": {
-    "bg": "#0f1417",
-    "surface": "#1b2023",
-    "text": "#dfe3e7",
-    "accent": "#8ecff2",
-    "textOnAccent": "#003548",
-    "buttonHover": "#262b2e"
-  },
-  "ui": {
-    "cornerRadius": 2,
-    "accentBorders": true
-  },
-  "controlPanel": {
-    "defaultMode": "both"
-  },
-  "launcher": {
-    "searchUrl": "https://duckduckgo.com/?q={query}"
-  },
-  "apps": {
-    "wifi": "nm-connection-editor",
-    "bluetooth": "blueman-manager",
-    "fileManager": "dolphin",
-    "textEditor": "kate"
-  },
-  "panel": {
-    "wifi": {
-      "rightClick": "toggle"
+    // Defines the main interface colors.
+    "theme": {
+        "bg": "#0f1417",
+        "surface": "#1b2023",
+        "text": "#dfe3e7",
+        "accent": "#8ecff2",
+        "textOnAccent": "#003548",
+        "buttonHover": "#262b2e",
     },
-    "bluetooth": {
-      "rightClick": "toggle"
-    }
-  },
-  "performance": {
-    "statsRefreshSeconds": 3,
-    "processRefreshSeconds": 15,
-    "temperatureRefreshSeconds": 30
-  },
-  "powerProfile": {
-    "batteryFallbackEnabled": true,
-    "batteryFallbackThresholdPercent": 20,
-    "batteryFallbackProfile": "balanced",
-    "reduceBrightnessInEco": true,
-    "tlpChargeModes": {
-      "deplacement": {
-        "start": 0,
-        "stop": 95
-      },
-      "safe": {
-        "start": 75,
-        "stop": 80
-      }
-    }
-  },
-  "desktopWidgets": {
-    "position": "top-left",
-    "margin": 5,
-    "weather": {
-      "location": "Paris",
-      "latitude": 48.8566,
-      "longitude": 2.3522,
-      "refreshMinutes": 30
+
+    // Defines global fonts and sizes.
+    "fonts": {
+        "text": "sans-serif",
+        "mono": "monospace",
+        "icons": "Material Symbols Rounded",
+        "brand": "JetBrainsMono Nerd Font",
+        "logo": "\uf303",
+        "textSize": 13,
+        "iconSize": 16,
     },
-    "statsRefreshSeconds": 2,
-    "networkRefreshSeconds": 20
-  },
-  "wallpaper": {
-    "directory": "~/Pictures/wallpapers"
-  },
-  "eco": {
-    "ecoVolume": 30,
-    "ecoBrightness": 30,
-    "normalVolume": 60,
-    "normalBrightness": 100
-  },
-  "wallpaperPaletteLabels": {
-    "background": "Fond",
-    "surface": "Surface",
-    "primary": "Primaire",
-    "secondary": "Secondaire",
-    "tertiary": "Tertiaire"
-  }
+
+    // Sets shared corner and border styles.
+    "ui": {
+        "cornerRadius": 2,
+        "accentBorders": true,
+    },
+
+    // Chooses the default control panel view.
+    "controlPanel": {
+        "defaultMode": "both",
+    },
+
+    // Sets the web search URL; {query} is replaced with the encoded search text.
+    "launcher": {
+        "searchUrl": "https://duckduckgo.com/?q={query}",
+    },
+
+    // Sets the applications used by the bar and file-opening actions.
+    "apps": {
+        "wifi": "nm-connection-editor",
+        "bluetooth": "blueman-manager",
+        "fileManager": "dolphin",
+        "textEditor": "kate",
+    },
+
+    // Sets bar actions. Use "none" to disable a right-click action.
+    "panel": {
+        "wifi": {
+            "rightClick": "toggle",
+        },
+        "bluetooth": {
+            "rightClick": "toggle",
+        },
+    },
+
+    // Sets system statistics refresh intervals, in seconds.
+    "performance": {
+        "statsRefreshSeconds": 3,
+        "processRefreshSeconds": 15,
+        "temperatureRefreshSeconds": 30,
+    },
+
+    // Configures low-battery power behavior and TLP charge limits.
+    "powerProfile": {
+        "batteryFallbackEnabled": true,
+        "batteryFallbackThresholdPercent": 20,
+        "batteryFallbackProfile": "balanced",
+        "reduceBrightnessInEco": true,
+        "tlpChargeModes": {
+            "deplacement": {
+                "start": 0,
+                "stop": 95,
+            },
+            "safe": {
+                "start": 75,
+                "stop": 80,
+            },
+        },
+    },
+
+    // Sets desktop widget placement and update intervals.
+    "desktopWidgets": {
+        "position": "top-left",
+        "margin": 5,
+        "weather": {
+            "location": "Paris",
+            "latitude": 48.8566,
+            "longitude": 2.3522,
+            "refreshMinutes": 30,
+        },
+        "statsRefreshSeconds": 2,
+        "networkRefreshSeconds": 20,
+    },
+
+    // Sets the folder used by the wallpaper picker and wallpaper actions.
+    "wallpaper": {
+        "directory": "~/Pictures/wallpapers",
+    },
+
+    // Defines eco and normal sound and brightness levels.
+    "eco": {
+        "ecoVolume": 30,
+        "ecoBrightness": 30,
+        "normalVolume": 60,
+        "normalBrightness": 100,
+    },
+
+    // Provides labels for wallpaper palette colors.
+    "wallpaperPaletteLabels": {
+        "background": "Fond",
+        "surface": "Surface",
+        "primary": "Primaire",
+        "secondary": "Secondaire",
+        "tertiary": "Tertiaire",
+    },
 }
 EOF
 ); then
@@ -99,6 +133,7 @@ EOF
         printf 'Keeping existing %s\n' "$config_file"
         exit 0
     fi
+
     printf 'Could not create %s\n' "$config_file" >&2
     exit 1
 fi
