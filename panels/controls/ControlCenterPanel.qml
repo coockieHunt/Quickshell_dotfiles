@@ -66,9 +66,7 @@ Item {
 
                 Text {
                     anchors.left: parent.left
-                    anchors.right: settingsButton.left
                     anchors.rightMargin: Theme.spacing
-
                     text: "Centre de contrôle"
                     color: Theme.text
                     font.family: Theme.fontFamily
@@ -402,10 +400,10 @@ Item {
 
             ListView {
                 width: parent.width
-                height: Math.max(0, parent.height - 28 - 144 - 56 - 28 - 28 - 1 - 28 - Theme.spacing * 8 - (controller.muteMessage !== "" ? 28 + Theme.spacing : 0))
+                height: Math.max(0, parent.height - y)
                 clip: true
                 spacing: Theme.spacing
-                model: controller.history.slice(0, 6)
+                model: controller.history
 
                 Text {
                     anchors.centerIn: parent
