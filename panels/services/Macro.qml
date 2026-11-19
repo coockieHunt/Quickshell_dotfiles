@@ -9,20 +9,31 @@ Scope {
     id: root
     property bool panelOpen: false
     property var keybindings: []
+    property string keybindingContents: ""
+    property bool keybindingsLoaded: false
+
+    readonly property int keysColumnWidth: 210
+
+    readonly property int macroCount: {
+        let count = 0
+        for (let i = 0; i < keybindings.length; i++) {
+            if (keybindings[i].type === "binding")
+                count++
+        }
+        return count
+    }
 
     function openPanel() {
         panelOpen = true
     }
 
-    property string keybindingContents: ""
-
     function updateKeybindings(contents) {
         keybindingContents = contents
-        if (keybindingParser.status === Loader.Ready) {
+        if (keybindingParser.status === Loader.Ready && keybindingParser.item) {
             keybindings = keybindingParser.item.parseKeybindings(contents)
+            keybindingsLoaded = true
         }
     }
-
 
     Loader {
         id: keybindingParser
@@ -31,10 +42,11 @@ Scope {
     }
 
     FileView {
-        path: Quickshell.env("HOME") + "/.config/hypr/keybinding.lua"
+        path: Theme.keybindingFile
         watchChanges: true
         onFileChanged: reload()
         onLoaded: root.updateKeybindings(text())
+        onLoadFailed: console.warn("Keybindings introuvables :", Theme.keybindingFile)
     }
 
     PanelWindow {
@@ -49,7 +61,7 @@ Scope {
 
         onVisibleChanged: {
             if (visible)
-                focusItem.forceActiveFocus()
+                Qt.callLater(() => focusItem.forceActiveFocus())
         }
 
         Item {
@@ -65,150 +77,222 @@ Scope {
             }
 
             Rectangle {
+                id: panel
                 anchors.centerIn: parent
                 z: 1
-                width: Math.min(parent.width - Theme.margin * 2, 620)
-                height: Math.min(parent.height - Theme.margin * 2, 560)
+                width: Math.min(parent.width - Theme.margin * 2, 680)
+                height: Math.min(parent.height - Theme.margin * 2, 600)
                 radius: Theme.cornerRadius
                 color: Theme.componentBackground
                 border.width: 1
                 border.color: Theme.componentBorder
+                clip: true
 
-                MouseArea {
-                    anchors.fill: parent
-                }
+                MouseArea { anchors.fill: parent }
 
-                Column {
-                    anchors.fill: parent
-                    anchors.margins: Theme.margin
-                    spacing: Theme.spacing
+                Item {
+                    id: header
+                    anchors { top: parent.top; left: parent.left; right: parent.right }
+                    height: 56
 
-                    Item {
-                        width: parent.width
-                        height: 28
+                    Row {
+                        anchors.left: parent.left
+                        anchors.leftMargin: 20
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 10
 
                         Text {
-                            anchors.left: parent.left
-                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "keyboard"
+                            color: Theme.accent
+                            font.family: Theme.iconFont
+                            font.pixelSize: Theme.iconSize + 4
+                        }
+
+                        Text {
                             anchors.verticalCenter: parent.verticalCenter
                             text: "Raccourcis clavier"
                             color: Theme.text
                             font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSize + 2
+                            font.pixelSize: Theme.fontSize + 3
                             font.weight: Font.DemiBold
                         }
                     }
 
                     Rectangle {
-                        width: parent.width
-                        height: 1
-                        color: Theme.buttonHover
+                        anchors.right: parent.right
+                        anchors.rightMargin: 16
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: counterText.implicitWidth + 20
+                        height: 26
+                        radius: 0
+                        color: Qt.rgba(
+                            Theme.accent.r,
+                            Theme.accent.g,
+                            Theme.accent.b,
+                            0.15
+                        )
+
+                        Text {
+                            id: counterText
+                            anchors.centerIn: parent
+                            text: root.macroCount + (root.macroCount > 1 ? " macros" : " macro")
+                            color: Theme.accent
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSize - 1
+                            font.weight: Font.DemiBold
+                        }
                     }
 
-                    Flickable {
-                        width: parent.width
-                        height: parent.height - 28 - Theme.spacing - 1
-                        contentHeight: bindingsColumn.implicitHeight
-                        clip: true
-                        boundsBehavior: Flickable.StopAtBounds
+                    Rectangle {
+                        anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
+                        height: 1
+                        color: Theme.componentBorder
+                    }
+                }
 
-                        Column {
-                            id: bindingsColumn
-                            width: parent.width
-                            spacing: Theme.spacing / 2
+                ListView {
+                    id: list
+                    anchors {
+                        top: header.bottom
+                        bottom: parent.bottom
+                        left: parent.left
+                        right: parent.right
+                        topMargin: 8
+                        bottomMargin: 12
+                        leftMargin: 20
+                        rightMargin: 12
+                    }
+                    clip: true
+                    spacing: 2
+                    model: root.keybindings
+                    boundsBehavior: Flickable.StopAtBounds
 
-                            Repeater {
-                                model: root.keybindings
+                    delegate: Item {
+                        id: row
+                        required property var modelData
+                        required property int index
+                        readonly property bool isTitle: modelData.type === "title"
 
-                                delegate: Item {
-                                    required property var modelData
-                                    width: bindingsColumn.width
-                                    height: modelData.type === "title"
-                                        ? titleLabel.implicitHeight + Theme.spacing / 2
-                                        : bindingCard.height
+                        width: ListView.view.width - 8
+                        height: isTitle ? 40 : 38
 
-                                    Text {
-                                        id: titleLabel
-                                        visible: modelData.type === "title"
-                                        width: parent.width
-                                        text: modelData.title
-                                        color: Theme.text
-                                        font.family: Theme.fontFamily
-                                        font.pixelSize: Theme.fontSize + 1
-                                        font.weight: Font.DemiBold
-                                    }
+                        Text {
+                            visible: row.isTitle
+                            anchors.left: parent.left
+                            anchors.leftMargin: 8
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: 6
+                            text: (row.modelData.title ?? "").toUpperCase()
+                            color: Theme.accent
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSize - 1
+                            font.weight: Font.Bold
+                            font.letterSpacing: 1.2
+                        }
 
-                                    Rectangle {
-                                        id: bindingCard
-                                        visible: modelData.type === "binding"
-                                        width: parent.width
-                                        height: Math.max(38, bindingRow.implicitHeight + Theme.spacing)
-                                        radius: Theme.cornerRadius
-                                        color: Theme.componentSurface
+                        Rectangle {
+                            visible: !row.isTitle
+                            anchors.fill: parent
+                            radius: Theme.cornerRadius
+                            color: rowMouse.containsMouse ? Theme.buttonHover : "transparent"
 
-                                        Row {
-                                            id: bindingRow
-                                            anchors {
-                                                fill: parent
-                                                margins: Theme.spacing / 2
-                                            }
-                                            spacing: Theme.spacing
+                            MouseArea {
+                                id: rowMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                            }
 
-                                            Item {
-                                                id: shortcutCell
-                                                width: Math.max(72, shortcutLabel.implicitWidth + Theme.spacing * 2)
-                                                height: descriptionLabel.implicitHeight
+                            Row {
+                                id: keysRow
+                                anchors.left: parent.left
+                                anchors.leftMargin: 8
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: 4
 
-                                                Rectangle {
-                                                    id: shortcutKeyCap
-                                                    anchors.centerIn: parent
-                                                    width: shortcutCell.width
-                                                    height: Math.max(28, shortcutLabel.implicitHeight + Theme.spacing)
-                                                    radius: Theme.cornerRadius
-                                                    color: Qt.rgba(
-                                                        Theme.accent.r,
-                                                        Theme.accent.g,
-                                                        Theme.accent.b,
-                                                        0.16
-                                                    )
+                                Repeater {
+                                    id: keysRepeater
+                                    model: row.isTitle ? [] :
+                                        (row.modelData.shortcut ?? "")
+                                            .split("+")
+                                            .map(s => s.trim())
+                                            .filter(s => s.length > 0)
 
-                                                    Text {
-                                                        id: shortcutLabel
-                                                        anchors.centerIn: parent
-                                                        text: modelData.shortcut
-                                                        color: Theme.accent
-                                                        font.family: Theme.monoFont
-                                                        font.pixelSize: Theme.fontSize - 1
-                                                        font.weight: Font.DemiBold
-                                                        wrapMode: Text.Wrap
-                                                    }
+                                    delegate: Row {
+                                        id: keyItem
+                                        required property string modelData
+                                        required property int index
+                                        spacing: 4
+
+                                        Rectangle {
+                                            width: Math.max(26, keyText.implicitWidth + 14)
+                                            height: 26
+                                            radius: 6
+                                            color: Theme.componentSurface
+                                            border.width: 1
+                                            border.color: Theme.componentBorder
+
+                                            Rectangle {
+                                                anchors {
+                                                    left: parent.left; right: parent.right
+                                                    bottom: parent.bottom
+                                                    leftMargin: 4; rightMargin: 4
                                                 }
+                                                height: 2
+                                                radius: 1
+                                                color: Theme.accent
+                                                opacity: 0.35
                                             }
 
                                             Text {
-                                                id: descriptionLabel
-                                                width: bindingRow.width - shortcutCell.width - bindingRow.spacing
-                                                text: modelData.description
-                                                color: Theme.text
-                                                font.family: Theme.fontFamily
-                                                font.pixelSize: Theme.fontSize
-                                                wrapMode: Text.Wrap
+                                                id: keyText
+                                                anchors.centerIn: parent
+                                                anchors.verticalCenterOffset: -1
+                                                text: keyItem.modelData
+                                                color: Theme.accent
+                                                font.family: Theme.monoFont
+                                                font.pixelSize: Theme.fontSize - 2
+                                                font.weight: Font.DemiBold
                                             }
+                                        }
+
+                                        Text {
+                                            visible: keyItem.index < keysRepeater.count - 1
+                                            text: "+"
+                                            color: Theme.text
+                                            opacity: 0.35
+                                            font.family: Theme.fontFamily
+                                            font.pixelSize: Theme.fontSize - 2
+                                            anchors.verticalCenter: parent.verticalCenter
                                         }
                                     }
                                 }
                             }
 
                             Text {
-                                visible: root.keybindings.length === 0
-                                width: parent.width
-                                text: "Aucun raccourci clavier trouvé."
+                                anchors.left: parent.left
+                                anchors.leftMargin: 8 + root.keysColumnWidth + 12
+                                anchors.right: parent.right
+                                anchors.rightMargin: 8
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: row.modelData.description ?? ""
                                 color: Theme.text
                                 font.family: Theme.fontFamily
                                 font.pixelSize: Theme.fontSize
+                                elide: Text.ElideRight
                             }
                         }
                     }
+                }
+
+                Text {
+                    visible: root.keybindingsLoaded && root.keybindings.length === 0
+                    anchors.centerIn: parent
+                    text: "Aucun raccourci clavier trouvé."
+                    color: Theme.text
+                    opacity: 0.6
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize
                 }
             }
         }

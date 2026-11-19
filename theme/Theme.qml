@@ -94,6 +94,8 @@ Singleton {
 
     property string wallpaper: ""
     property string wallpaperDir: Quickshell.env("HOME") + "/Pictures/wallpapers"
+    // EDIT : fichier de keybindings lu par le panneau Macro
+    property string keybindingFile: Quickshell.env("HOME") + "/.config/hypr/keybinding.lua"
     readonly property string wallpaperScript: Quickshell.env("HOME") + "/.config/quickshell/scripts/wallpaper.sh"
 
     readonly property int barHeight: 30
@@ -205,6 +207,7 @@ Singleton {
                 const performance = config.performance
                 const powerProfile = config.powerProfile
                 const wallpaperConfig = config.wallpaper
+                const keybindingsConfig = config.keybindings   // EDIT
                 const updates = config.updates
                 const launcher = config.launcher
                 const watchers = config.watchers
@@ -244,6 +247,11 @@ Singleton {
                             || wallpaperConfig.directory.trim() === ""
                             || (!wallpaperConfig.directory.startsWith("/")
                                 && !wallpaperConfig.directory.startsWith("~/"))))
+                        // EDIT : validation du fichier de keybindings (optionnel)
+                        || (keybindingsConfig && (typeof keybindingsConfig.file !== "string"
+                            || keybindingsConfig.file.trim() === ""
+                            || (!keybindingsConfig.file.startsWith("/")
+                                && !keybindingsConfig.file.startsWith("~/"))))
                         || !performance
                         || !powerProfile
                         || typeof powerProfile.batteryFallbackEnabled !== "boolean"
@@ -320,6 +328,11 @@ Singleton {
                 root.wallpaperDir = wallpaperDirectory.startsWith("~/")
                     ? Quickshell.env("HOME") + wallpaperDirectory.slice(1)
                     : wallpaperDirectory
+                // EDIT : application du chemin du fichier de keybindings
+                const keybindingPath = keybindingsConfig?.file || "~/.config/hypr/keybinding.lua"
+                root.keybindingFile = keybindingPath.startsWith("~/")
+                    ? Quickshell.env("HOME") + keybindingPath.slice(1)
+                    : keybindingPath
                 root.ecoSettings = eco
                 root.wallpaperPaletteLabels = labels
                 root.fontFamily = fonts?.text || "sans-serif"

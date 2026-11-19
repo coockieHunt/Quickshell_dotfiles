@@ -37,7 +37,7 @@ Quick access to:
 
 The panel is named **Control Center** in the interface. Its keyboard button
 opens the shortcuts panel, which reads descriptions from `-- @desc:` comments
-in `~/.config/hypr/keybinding.lua`.
+in the keybindings file (by default `~/.config/hypr/keybinding.lua`).
 
 ### Desktop widgets
 
@@ -88,10 +88,23 @@ to customize launch commands, names, and icons.
 
 ### Keyboard shortcuts
 
-The shortcuts panel reads `~/.config/hypr/keybinding.lua`. Add a
-`-- @desc: ...` comment immediately before an `hl.bind(...)` line to show an
-explanation beside that shortcut in the panel. Use `-- @title: ...` to add a
-section heading above subsequent shortcuts.
+The shortcuts panel reads the keybindings file set in `config.jsonc`:
+
+```jsonc
+"keybindings": {
+    "file": "~/.config/hypr/keybinding.lua",
+},
+```
+
+Annotate bindings with these comments:
+
+- `-- @title: ...` adds a section heading above the following shortcuts.
+- `-- @desc: ...` adds a description to the next `hl.bind(...)` line.
+- `-- @ignore` hides the next binding from the panel (useful for media keys,
+  volume, brightness, and other bindings that don't need to be displayed).
+
+Changes to the file or to `config.jsonc` are picked up automatically; the
+configuration reloads without restarting Quickshell.
 
 ### Power management
 
@@ -231,6 +244,7 @@ be used to change:
 - Power fallback settings
 - Eco levels
 - Wallpaper palette labels
+- Keybindings file location (`keybindings.file`)
 
 [`create-config.sh`](./create-config.sh) creates a default `config.jsonc` if
 one does not already exist. If the file already exists, it leaves it untouched.
@@ -406,9 +420,9 @@ without relying on a large pre-made configuration.
 I prefer knowing how things work rather than having something that simply
 works.
 
-🇫🇷 C’est une config perso, donc pas forcément la solution la plus élégante. Ça marche, je comprends comment, et je suis zen 🧘
+🇫🇷 C'est une config perso, donc pas forcément la solution la plus élégante. Ça marche, je comprends comment, et je suis zen 🧘
 
-🇬🇧 It’s my own setup, so maybe not the most elegant solution. It works, I get how it works, and I’m zen 🧘
+🇬🇧 It's my own setup, so maybe not the most elegant solution. It works, I get how it works, and I'm zen 🧘
 
 ---
 

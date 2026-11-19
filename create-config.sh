@@ -21,6 +21,11 @@ if ! (set -o noclobber; cat > "$config_file" <<'EOF'
         "buttonHover": "#262b2e",
     },
 
+    // Sets the Hyprland keybinding file shown in the macros panel.
+    "keybindings": {
+        "file": "~/.config/hypr/keybinding.lua",
+    },
+
     // Defines song of triger usb/bat/charge ....
     "watchers": {
         "soundDir": "/usr/share/sounds/freedesktop/stereo",
