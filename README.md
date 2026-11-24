@@ -150,17 +150,17 @@ charging range.
 
 ## Screenshots
 
-| Application launcher                       | Desktop and media controls                                 |
-| ------------------------------------------ | ---------------------------------------------------------- |
-| ![Application launcher](./screen/app.webp) | ![Desktop with media controls](./screen/desk_musique.webp) |
+![Color schemes and desktop overview](./screen/color.webp)
 
-| Performance and quick settings                              | Desktop overview                      |
-| ----------------------------------------------------------- | ------------------------------------- |
-| ![Performance panel and quick settings](./screen/panel.png) | ![Desktop overview](./screen/ff.webp) |
+| Desktop overview                      | Control Center and performance                               |
+| ------------------------------------- | ------------------------------------------------------------ |
+| ![Desktop overview](./screen/ff.webp) | ![Performance panel and quick settings](./screen/panel.webp) |
 
-| Power menu                                      | Wallpaper picker                      |
-| ----------------------------------------------- | ------------------------------------- |
-| ![Power and session menu](./screen/reboot.webp) | ![Wallpaper picker](./screen/wp.webp) |
+| Application launcher                       | Wallpaper picker                      |
+| ------------------------------------------ | ------------------------------------- |
+| ![Application launcher](./screen/app.webp) | ![Wallpaper picker](./screen/wp.webp) |
+
+More screenshots (calendar, weather, media controls, shortcuts, power menu) are available in the [`screen/`](./screen/) directory.
 
 ---
 
