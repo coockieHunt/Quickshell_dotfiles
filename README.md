@@ -21,6 +21,7 @@
 - Battery and system indicators
 - Notifications
 - Power menu
+- Central island border highlighted while the Super key is held (optional)
 
 ### Calendar
 
@@ -126,6 +127,52 @@ Annotate bindings with these comments:
 Changes to the file or to `config.jsonc` are picked up automatically; the
 configuration reloads without restarting Quickshell.
 
+### Super key highlight
+
+While the **Super** key is held, the border of the central island in the bar
+switches to the theme accent color. This is handled by a Hyprland global
+shortcut that Quickshell listens to, so it works even though Quickshell does
+not receive the key press directly.
+
+It takes two parts, and the name used in both must be identical.
+
+**1. Quickshell side** — in `config.jsonc`:
+
+```jsonc
+"superHighlight": {
+    "enabled": true,
+    "var": "superHeld",
+},
+```
+
+- `enabled` — set to `false` to disable the highlight.
+- `var` — name of the global shortcut Quickshell listens to (the shortcut is
+  registered as `quickshell:<var>`).
+
+**2. Hyprland side** — in `~/.config/hypr/keybinding.lua`:
+
+```lua
+-- Must be identical to "var" in config.jsonc
+local superHighlightVar = "superHeld"
+
+-- Press: highlight on
+hl.bind("SUPER + code:133", hl.dsp.global("quickshell:" .. superHighlightVar),
+    { transparent = true })
+
+-- Release: highlight off
+hl.bind("SUPER + code:133", hl.dsp.global("quickshell:" .. superHighlightVar),
+    { transparent = true, release = true })
+```
+
+Notes:
+
+- `code:133` is the keycode of the left Super key (`Super_L`) on most
+  keyboards. Check yours with `wev` if nothing happens.
+- `transparent = true` lets the key press continue to other bindings, so your
+  regular `SUPER + <key>` shortcuts keep working.
+- If you change `var` in `config.jsonc`, change `superHighlightVar` in the Lua
+  file too, then reload Hyprland.
+
 ### Power management
 
 Optional power-related features include:
@@ -215,6 +262,7 @@ Optional integrations:
 - `nm-connection-editor`
 - `xdg-open`
 - `hyprshutdown`
+- `wev` (to find the keycode of your Super key)
 - [Thyx](https://github.com/rccyx/thyx), an SDDM login theme (not a session lock screen)
 
 A wallpaper collection is expected in:
@@ -249,6 +297,9 @@ The shell is designed to run inside a Hyprland session.
 Some commands use Hyprland IPC and will therefore require adjustments when
 used with another compositor.
 
+To use the [Super key highlight](#super-key-highlight), also add the two
+`hl.bind(...)` lines to your Hyprland keybinding file.
+
 ---
 
 ## Configuration
@@ -257,6 +308,7 @@ The main configuration is stored in [`config.jsonc`](./config.jsonc). It can
 be used to change:
 
 - Colors
+- Super key highlight (`superHighlight.enabled` and `superHighlight.var`)
 - Refresh intervals
 - Weather location, refresh interval and on/off switch
 - Default control-panel view
@@ -269,7 +321,9 @@ be used to change:
 - Keybindings file location (`keybindings.file`)
 
 [`setup-config.sh`](./setup-config.sh) creates a default `config.jsonc` if
-one does not already exist. If the file already exists, it leaves it untouched.
+one does not already exist. If the file already exists, it leaves it untouched,
+so new options (such as `superHighlight`) must be added by hand to an existing
+file.
 
 Set applications in the `apps` category: `wifi`, `bluetooth`, `fileManager`,
 and `textEditor`. The settings button first opens `config.jsonc` with the
@@ -431,6 +485,8 @@ OSD, power, and keyboard-shortcut interfaces.
 The files are grouped into `apps/`, `controls/`, `desktop/`, `notifications/`,
 `services/`, and `shell/`. The calendar and weather dropdowns live in `apps/`,
 and the weather data service (`WeatherService.qml`) lives in `services/`.
+The Super key highlight (global shortcut listener) lives in
+`panels/shell/Bar.qml`.
 
 ```text
 components/
@@ -473,9 +529,3 @@ works.
 🇫🇷 C'est une config perso, donc pas forcément la solution la plus élégante. Ça marche, je comprends comment, et je suis zen 🧘
 
 🇬🇧 It's my own setup, so maybe not the most elegant solution. It works, I get how it works, and I'm zen 🧘
-
----
-
-## License
-
-MIT License. See [`LICENSE`](./LICENSE).

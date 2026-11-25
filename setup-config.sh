@@ -21,12 +21,19 @@ if ! (set -o noclobber; cat > "$config_file" <<'EOF'
         "buttonHover": "#262b2e",
     },
 
+    // Highlights the central island border while the Super key is held.
+    // "var" must match superHighlightVar in ~/.config/hypr/keybinding.lua.
+    "superHighlight": {
+        "enabled": true,
+        "var": "superHeld",
+    },
+
     // Sets the Hyprland keybinding file shown in the macros panel.
     "keybindings": {
         "file": "~/.config/hypr/keybinding.lua",
     },
 
-    // Defines song of triger usb/bat/charge ....
+    // Defines the sounds played on USB, battery and charger events.
     "watchers": {
         "soundDir": "/usr/share/sounds/freedesktop/stereo",
         "soundExt": "oga",
@@ -36,8 +43,8 @@ if ! (set -o noclobber; cat > "$config_file" <<'EOF'
             "batteryLow": "battery-low",
             "usbAdd": "device-added",
             "usbRemove": "device-removed"
-        }    
-    }
+        }
+    },
 
     // Defines global fonts and sizes.
     "fonts": {

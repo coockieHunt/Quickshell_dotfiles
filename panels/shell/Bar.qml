@@ -22,7 +22,15 @@ Scope {
     required property var wallpaperPicker
     required property var notificationControl
     property var performanceSource: null
+    property bool superHeld: false
     signal hideRequested()
+
+    GlobalShortcut {
+        name: Theme.superHighlightVar
+        description: "État d’appui de la touche Super pour la barre"
+        onPressed: barRoot.superHeld = Theme.superHighlightEnabled
+        onReleased: barRoot.superHeld = false
+    }
 
     function popup(cmd, size) {
         const s = size || "700 500"
@@ -170,7 +178,13 @@ Scope {
                 bottomRightRadius: Theme.cornerRadius
                 color: Qt.rgba(Theme.componentBackground.r, Theme.componentBackground.g, Theme.componentBackground.b, 0.95)
                 border.width: 0.5
-                border.color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.1)
+                border.color: Theme.superHighlightEnabled && barRoot.superHeld
+                    ? Theme.accent
+                    : Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.1)
+
+                Behavior on border.color {
+                    ColorAnimation { duration: 120 }
+                }
 
                 MouseArea {
                     anchors.fill: parent

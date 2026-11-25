@@ -22,6 +22,10 @@ Singleton {
     property real cornerRadius: 2
     property bool accentBorders: true
 
+    property bool superHighlightEnabled: true
+    property string superHighlightVar: "superHeld"
+
+
     readonly property color componentBackground: root.bg
     readonly property color componentSurface: root.surface
     readonly property color componentBorder: root.accentBorders
@@ -544,6 +548,15 @@ Singleton {
                 root.archLogo = fonts?.logo || "\uf303"
                 root.fontSize = fonts?.textSize || 13
                 root.iconSize = fonts?.iconSize || 16
+
+                const superCfg = config.superHighlight
+                root.superHighlightEnabled =
+                    typeof superCfg?.enabled === "boolean" ? superCfg.enabled : true
+                root.superHighlightVar =
+                    (typeof superCfg?.var === "string" && /^[A-Za-z0-9_]+$/.test(superCfg.var))
+                        ? superCfg.var
+                        : "superHeld"
+
 
                 root.configRevision++
             } catch (error) {
