@@ -3,8 +3,6 @@ import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Services.UPower
-import Quickshell.Services.SystemTray
-import Quickshell.Widgets
 import QtQuick
 import "../../components"
 import "../../components/action"
@@ -732,113 +730,11 @@ Scope {
                 }
             }
 
-            PopupWindow {
-                id: trayPopup
-
-                anchor.window: trayButton.QsWindow.window
-                anchor.adjustment: PopupAdjustment.None
-                anchor.gravity: Edges.Bottom | Edges.Right
-                anchor.onAnchoring: {
-                    const content = trayButton.QsWindow.contentItem
-                    const pos = content.mapFromItem(
-                        trayButton,
-                        trayButton.width / 2 - trayPopup.width / 2,
-                        trayButton.height
-                    )
-                    anchor.rect.x = Math.max(4, Math.min(pos.x, content.width - trayPopup.width - 4))
-                    anchor.rect.y = pos.y + Theme.dropdownGap
-                }
-
-                visible: panelWindow.trayPopupOpen && barRoot.barVisible
-                grabFocus: true
-                implicitWidth: 220
-                implicitHeight: Math.max(48, trayContent.implicitHeight + 16)
-                color: "transparent"
-                onVisibleChanged: {
-                    if (!visible)
-                        panelWindow.trayPopupOpen = false
-                }
-
-                Rectangle {
-                    anchors.fill: parent
-                    radius: Theme.cornerRadius
-                    color: Theme.componentBackground
-                    border.width: 1
-                    border.color: Theme.componentBorder
-
-                    Column {
-                        id: trayContent
-                        anchors.fill: parent
-                        anchors.margins: 8
-                        spacing: 2
-
-                        Repeater {
-                            model: SystemTray.items
-
-                            delegate: Rectangle {
-                                required property var modelData
-                                width: trayContent.width
-                                height: 34
-                                radius: Theme.cornerRadius
-                                color: trayItemMouse.containsMouse ? Theme.buttonHover : "transparent"
-
-                                Row {
-                                    anchors.fill: parent
-                                    anchors.leftMargin: 8
-                                    anchors.rightMargin: 8
-                                    spacing: 8
-
-                                    IconImage {
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        width: 20
-                                        height: 20
-                                        source: modelData.icon
-                                    }
-
-                                    Text {
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        width: parent.width - 36
-                                        text: modelData.tooltipTitle || modelData.title || modelData.id
-                                        color: Theme.text
-                                        font.family: Theme.fontFamily
-                                        font.pixelSize: Theme.fontSize
-                                        elide: Text.ElideRight
-                                    }
-                                }
-
-                                MouseArea {
-                                    id: trayItemMouse
-                                    anchors.fill: parent
-                                    acceptedButtons: Qt.LeftButton | Qt.RightButton
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: mouse => {
-                                        if (modelData.onlyMenu
-                                                || (mouse.button === Qt.RightButton && modelData.hasMenu)) {
-                                            modelData.display(trayPopup, Math.round(mouse.x), Math.round(mouse.y))
-                                        } else if (mouse.button === Qt.LeftButton) {
-                                            modelData.activate()
-                                            panelWindow.trayPopupOpen = false
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        Text {
-                            visible: SystemTray.items.count === 0
-                            width: trayContent.width
-                            height: 32
-                            text: "Aucune icône disponible"
-                            color: Theme.text
-                            opacity: 0.7
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSize
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                    }
-                }
+            SystemTrayPanel {
+                anchorItem: trayButton
+                open: panelWindow.trayPopupOpen
+                barVisible: barRoot.barVisible
+                onClosed: panelWindow.trayPopupOpen = false
             }
 
             LazyLoader {
