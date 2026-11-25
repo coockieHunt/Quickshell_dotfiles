@@ -8,7 +8,7 @@ PopupWindow {
     id: popup
 
     required property Item anchorItem
-    required property var controller
+    required property var notificationController
     property bool open: false
     property bool barVisible: true
 
@@ -87,26 +87,26 @@ PopupWindow {
                         height: 28
                         label: "delete_sweep"
                         tooltip: "Effacer l’historique"
-                        onClicked: popup.controller.history = []
+                        onClicked: popup.notificationController.history = []
                     }
 
                     Rectangle {
                         id: muteButton
-                        width: popup.controller.notificationsMuted ? 86 : 28
+                        width: popup.notificationController.notificationsMuted ? 86 : 28
                         height: 28
                         radius: Theme.cornerRadius
                         color: muteMouse.containsMouse
                             ? Theme.buttonHover
-                            : (popup.controller.notificationsMuted || popup.muteOpen)
+                            : (popup.notificationController.notificationsMuted || popup.muteOpen)
                                 ? Theme.surface : "transparent"
 
                         Text {
                             anchors.left: parent.left
                             anchors.leftMargin: 5
                             anchors.verticalCenter: parent.verticalCenter
-                            text: popup.controller.notificationsMuted
+                            text: popup.notificationController.notificationsMuted
                                 ? "notifications_paused" : "notifications_active"
-                            color: popup.controller.notificationsMuted ? Theme.danger : Theme.text
+                            color: popup.notificationController.notificationsMuted ? Theme.danger : Theme.text
                             font.family: Theme.iconFont
                             font.pixelSize: Theme.iconSize
                         }
@@ -115,8 +115,8 @@ PopupWindow {
                             anchors.right: parent.right
                             anchors.rightMargin: 5
                             anchors.verticalCenter: parent.verticalCenter
-                            visible: popup.controller.notificationsMuted
-                            text: popup.controller.muteTimeRemaining
+                            visible: popup.notificationController.notificationsMuted
+                            text: popup.notificationController.muteTimeRemaining
                             color: Theme.danger
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.fontSize - 4
@@ -128,8 +128,8 @@ PopupWindow {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
-                                if (popup.controller.notificationsMuted)
-                                    popup.controller.cancelNotificationMute()
+                                if (popup.notificationController.notificationsMuted)
+                                    popup.notificationController.cancelNotificationMute()
                                 else
                                     popup.muteOpen = !popup.muteOpen
                             }
@@ -200,7 +200,7 @@ PopupWindow {
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
                                 popup.muteOpen = false
-                                popup.controller.setNotificationMute(modelData.duration)
+                                popup.notificationController.setNotificationMute(modelData.duration)
                             }
                         }
                     }
@@ -208,7 +208,7 @@ PopupWindow {
             }
 
             Rectangle {
-                visible: popup.controller.muteMessage !== ""
+                visible: popup.notificationController.muteMessage !== ""
                 width: parent.width
                 height: visible ? 28 : 0
                 radius: Theme.cornerRadius
@@ -217,7 +217,7 @@ PopupWindow {
                 Text {
                     anchors.fill: parent
                     anchors.leftMargin: 8
-                    text: popup.controller.muteMessage
+                    text: popup.notificationController.muteMessage
                     color: Theme.danger
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSize - 1
@@ -231,11 +231,11 @@ PopupWindow {
                 height: Math.max(60, Math.min(contentHeight, 380))
                 clip: true
                 spacing: Theme.spacing
-                model: popup.controller.history
+                model: popup.notificationController.history
 
                 Text {
                     anchors.centerIn: parent
-                    visible: popup.controller.history.length === 0
+                    visible: popup.notificationController.history.length === 0
                     text: "Aucune notification récente"
                     color: Theme.text
                     opacity: 0.65
@@ -249,7 +249,7 @@ PopupWindow {
                     width: ListView.view.width
                     notification: modelData
                     notificationIndex: index
-                    onDismissed: popup.controller.removeHistoryNotification(notificationIndex)
+                    onDismissed: popup.notificationController.removeHistoryNotification(notificationIndex)
                 }
             }
         }

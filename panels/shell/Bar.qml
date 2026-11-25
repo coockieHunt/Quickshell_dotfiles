@@ -20,6 +20,7 @@ Scope {
     required property var launcherControl
     required property var wallpaperPicker
     required property var controller
+    required property var notificationController
     property var performanceSource: null
     property bool superHeld: false
     signal hideRequested()
@@ -712,7 +713,7 @@ Scope {
 
                     BarButton {
                         id: historyButton
-                        label: barRoot.controller.notificationsMuted
+                        label: barRoot.notificationController.notificationsMuted
                             ? "notifications_paused" : "notifications"
                         highlighted: panelWindow.historyOpen
                         onClicked: panelWindow.historyOpen = !panelWindow.historyOpen
@@ -749,7 +750,7 @@ Scope {
 
             NotificationHistoryPanel {
                 anchorItem: historyButton
-                controller: barRoot.controller
+                notificationController: barRoot.notificationController
                 open: panelWindow.historyOpen
                 barVisible: barRoot.barVisible
                 onCloseRequested: panelWindow.historyOpen = false

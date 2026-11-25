@@ -1,13 +1,11 @@
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
-import Quickshell.Services.Notifications
 import Quickshell.Services.Pipewire
 import Quickshell.Services.UPower
 import QtQuick
 import "../../components"
 import "../../theme"
-import "../notifications"
 
 Scope {
     id: root
@@ -19,7 +17,6 @@ Scope {
     property string pendingTlpChargeMode: ""
     property bool tlpChargeCommandRunning: false
     property var performanceControl: null
-    property var history: []
     property bool wifiEnabled: false
     property bool bluetoothEnabled: false
     property string wifiNetworkName: ""
@@ -38,20 +35,6 @@ Scope {
     property bool batteryEcoBrightnessHandled: false
     property bool batteryEcoBrightnessApplied: false
     property real batteryEcoBrightnessRestoreValue: 0
-    property double notificationMuteUntil: 0
-    property int muteClockTick: 0
-    property string muteMessage: ""
-    readonly property bool notificationsMuted: notificationMuteUntil === -1
-        || notificationMuteUntil > Date.now()
-    readonly property string muteTimeRemaining: {
-        muteClockTick
-        if (notificationMuteUntil === -1)
-            return "∞"
-        const seconds = Math.max(0, Math.ceil((notificationMuteUntil - Date.now()) / 1000))
-        if (seconds >= 3600)
-            return Math.floor(seconds / 3600) + " h " + Math.floor((seconds % 3600) / 60) + " min"
-        return Math.max(1, Math.ceil(seconds / 60)) + " min"
-    }
     readonly property bool airplaneEnabled: wifiStateKnown && bluetoothStateKnown
         && !wifiEnabled && !bluetoothEnabled
     readonly property var audio: Pipewire.defaultAudioSink
@@ -68,17 +51,6 @@ Scope {
 
     function showPanelMode(mode) {
         panelMode = mode
-    }
-
-    function removeHistoryNotification(index) {
-        const updatedHistory = history.slice()
-        const entry = updatedHistory[index]
-        if (!entry)
-            return
-        if (entry.notification?.tracked)
-            entry.notification.dismiss()
-        updatedHistory.splice(index, 1)
-        history = updatedHistory
     }
 
     IpcHandler {
@@ -145,20 +117,6 @@ Scope {
         ]
         powerProfileScript.running = true
         applyEcoSettings()
-    }
-
-    function setNotificationMute(durationMs) {
-        muteTimer.stop()
-        notificationMuteUntil = durationMs < 0
-            ? -1 : durationMs === 0 ? 0 : Date.now() + durationMs
-        if (durationMs > 0) {
-            muteTimer.interval = durationMs
-            muteTimer.start()
-        }
-        if (notificationsMuted) {
-            for (const notification of server.trackedNotifications.values)
-                notification.dismiss()
-        }
     }
 
     function setBrightness(value) {
@@ -270,53 +228,6 @@ Scope {
 
     onEcoModeActiveChanged: checkEcoBrightness()
     onPowerProfileChanged: checkEcoBrightness()
-
-    function cancelNotificationMute() {
-        setNotificationMute(0)
-        muteMessage = "Sourdine annulée"
-        muteMessageTimer.restart()
-    }
-
-    Timer {
-        id: muteTimer
-        onTriggered: root.notificationMuteUntil = 0
-    }
-
-    Timer {
-        interval: 1000
-        repeat: true
-        running: root.notificationMuteUntil > 0
-        onTriggered: {
-            root.muteClockTick++
-            if (root.notificationMuteUntil > 0 && Date.now() >= root.notificationMuteUntil)
-                root.notificationMuteUntil = 0
-        }
-    }
-
-    Timer {
-        id: muteMessageTimer
-        interval: 2500
-        onTriggered: root.muteMessage = ""
-    }
-
-    NotificationServer {
-        id: server
-        bodySupported: true
-        imageSupported: true
-        keepOnReload: false
-
-        onNotification: notif => {
-            root.history = [{
-                appName: notif.appName || "Notification",
-                summary: notif.summary || "",
-                body: notif.body || "",
-                receivedAt: Qt.formatDateTime(new Date(), "HH:mm"),
-                notification: notif
-            }, ...root.history].slice(0, 20)
-            if (!root.notificationsMuted || notif.urgency === NotificationUrgency.Critical)
-                notif.tracked = true
-        }
-    }
 
     Connections {
         target: UPower
@@ -518,6 +429,7 @@ Scope {
                 const percentage = Math.round(UPower.displayDevice.percentage * 100)
                 const profileLabel = Theme.batteryFallbackProfile === "eco" ? "Éco" : "Équilibré"
                 Quickshell.execDetached([
+                    "notify-send",
                     "Profil de batterie modifié",
                     `Batterie à ${percentage} % : profil ${profileLabel} activé.`
                 ])
@@ -736,11 +648,6 @@ Scope {
         onTriggered: root.refreshQuickSettings()
     }
 
-    NotificationToastWindow {
-        notifications: server.trackedNotifications
-        panelOpen: root.panelOpen
-    }
-
     PanelWindow {
         visible: root.panelOpen
         screen: Quickshell.screens[0]
@@ -819,7 +726,7 @@ Scope {
                     model: [
                         { mode: "performance", label: "Perf.", icon: "keyboard_arrow_left" },
                         { mode: "both", label: "Les deux", icon: "keyboard_arrow_up" },
-                        { mode: "notifications", label: "Notifs", icon: "keyboard_arrow_right" }
+                        { mode: "notifications", label: "Controlle", icon: "keyboard_arrow_right" }
                     ]
 
                     delegate: Rectangle {

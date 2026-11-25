@@ -23,6 +23,10 @@ Scope {
         performanceControl: bar.performanceSource
         macroControl: macro
     }
+    NotificationController {
+        id: notificationBackend
+        panelOpen: mainController.panelOpen
+    }
     OSD {}
 
     Bar {
@@ -31,6 +35,7 @@ Scope {
         launcherControl: launcher
         wallpaperPicker: picker
         controller: mainController
+        notificationController: notificationBackend
         onHideRequested: root.barVisible = false
     }
 
