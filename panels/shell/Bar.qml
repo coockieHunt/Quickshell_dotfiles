@@ -10,6 +10,7 @@ import "../../components/info"
 import "../../components/tooltip"
 import "../../theme"
 import "../../panels/services"
+import "../../panels/notifications"
 import "../apps"
 import "../controls"
 
@@ -18,7 +19,7 @@ Scope {
     required property bool barVisible
     required property var launcherControl
     required property var wallpaperPicker
-    required property var notificationControl
+    required property var controller
     property var performanceSource: null
     property bool superHeld: false
     signal hideRequested()
@@ -52,6 +53,7 @@ Scope {
             required property var modelData
             id: panelWindow
             property bool trayPopupOpen: false
+            property bool historyOpen: false
             property bool calendarOpen: false
             property bool weatherOpen: false
             screen: modelData
@@ -168,7 +170,7 @@ Scope {
                 anchors.centerIn: parent
                 width: clockText.implicitWidth
                     + (ecoBadge.visible ? ecoBadge.implicitWidth + 8 : 0)
-                    + (barRoot.notificationControl.powerProfile === "performance" ? performanceBadge.implicitWidth + 8 : 0)
+                    + (barRoot.controller.powerProfile === "performance" ? performanceBadge.implicitWidth + 8 : 0)
                     + (airplaneBadge.visible ? airplaneBadge.implicitWidth + 8 : 0)
                     + Theme.margin * 2
                 height: Theme.barHeight
@@ -301,8 +303,8 @@ Scope {
 
                     Rectangle {
                         id: ecoBadge
-                        visible: barRoot.notificationControl.ecoModeActive
-                            || barRoot.notificationControl.powerProfile === "power-saver"
+                        visible: barRoot.controller.ecoModeActive
+                            || barRoot.controller.powerProfile === "power-saver"
                         width: ecoBadgeContent.implicitWidth + 10
                         height: 20
                         y: (parent.height - height) / 2
@@ -336,13 +338,13 @@ Scope {
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: barRoot.notificationControl.returnToBalancedProfile()
+                            onClicked: barRoot.controller.returnToBalancedProfile()
                         }
                     }
 
                     Rectangle {
                         id: performanceBadge
-                        visible: barRoot.notificationControl.powerProfile === "performance"
+                        visible: barRoot.controller.powerProfile === "performance"
                         width: performanceBadgeContent.implicitWidth + 10
                         height: 20
                         y: (parent.height - height) / 2
@@ -376,13 +378,13 @@ Scope {
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: barRoot.notificationControl.returnToBalancedProfile()
+                            onClicked: barRoot.controller.returnToBalancedProfile()
                         }
                     }
 
                     Rectangle {
                         id: airplaneBadge
-                        visible: barRoot.notificationControl.airplaneEnabled
+                        visible: barRoot.controller.airplaneEnabled
                         width: airplaneBadgeContent.implicitWidth + 10
                         height: 20
                         y: (parent.height - height) / 2
@@ -471,7 +473,7 @@ Scope {
                             onClicked: barRoot.popup(Theme.wifiApplication)
                             onRightClicked: {
                                 if (Theme.barWifiRightClick === "toggle")
-                                    barRoot.notificationControl.toggleWifi()
+                                    barRoot.controller.toggleWifi()
                             }
                         }
 
@@ -483,8 +485,8 @@ Scope {
                             height: 7
                             radius: width / 2
                             color: Theme.accent
-                            visible: barRoot.notificationControl.wifiStateKnown
-                                && barRoot.notificationControl.wifiEnabled
+                            visible: barRoot.controller.wifiStateKnown
+                                && barRoot.controller.wifiEnabled
                             border.width: 1
                             border.color: Theme.componentBackground
                             z: 1
@@ -495,14 +497,14 @@ Scope {
                             shown: wifiButton.hovered
                             title: "Wi-Fi"
                             icon: "wifi"
-                            status: !barRoot.notificationControl.wifiStateKnown
+                            status: !barRoot.controller.wifiStateKnown
                                 ? "Lecture…"
-                                : barRoot.notificationControl.wifiEnabled ? "Activé" : "Désactivé"
-                            detail: !barRoot.notificationControl.wifiStateKnown
+                                : barRoot.controller.wifiEnabled ? "Activé" : "Désactivé"
+                            detail: !barRoot.controller.wifiStateKnown
                                 ? ""
-                                : !barRoot.notificationControl.wifiEnabled
+                                : !barRoot.controller.wifiEnabled
                                     ? ""
-                                    : barRoot.notificationControl.wifiNetworkName || "Non connecté"
+                                    : barRoot.controller.wifiNetworkName || "Non connecté"
                         }
                     }
 
@@ -517,7 +519,7 @@ Scope {
                             onClicked: barRoot.popup(Theme.bluetoothApplication)
                             onRightClicked: {
                                 if (Theme.barBluetoothRightClick === "toggle")
-                                    barRoot.notificationControl.toggleBluetooth()
+                                    barRoot.controller.toggleBluetooth()
                             }
                         }
 
@@ -529,8 +531,8 @@ Scope {
                             height: 7
                             radius: width / 2
                             color: Theme.accent
-                            visible: barRoot.notificationControl.bluetoothStateKnown
-                                && barRoot.notificationControl.bluetoothEnabled
+                            visible: barRoot.controller.bluetoothStateKnown
+                                && barRoot.controller.bluetoothEnabled
                             border.width: 1
                             border.color: Theme.componentBackground
                             z: 1
@@ -541,20 +543,20 @@ Scope {
                             shown: bluetoothButton.hovered
                             title: "Bluetooth"
                             icon: "bluetooth"
-                            status: !barRoot.notificationControl.bluetoothStateKnown
+                            status: !barRoot.controller.bluetoothStateKnown
                                 ? "Lecture…"
-                                : barRoot.notificationControl.bluetoothEnabled ? "Activé" : "Désactivé"
-                            detail: !barRoot.notificationControl.bluetoothStateKnown
+                                : barRoot.controller.bluetoothEnabled ? "Activé" : "Désactivé"
+                            detail: !barRoot.controller.bluetoothStateKnown
                                 ? ""
-                                : !barRoot.notificationControl.bluetoothEnabled
+                                : !barRoot.controller.bluetoothEnabled
                                     ? ""
-                                    : barRoot.notificationControl.bluetoothConnectedNames || "Aucun appareil"
+                                    : barRoot.controller.bluetoothConnectedNames || "Aucun appareil"
                         }
                     }
 
                     Item {
                         id: airplaneIndicator
-                        visible: barRoot.notificationControl.airplaneEnabled
+                        visible: barRoot.controller.airplaneEnabled
                         width: visible ? Theme.buttonSize : 0
                         height: Theme.buttonSize
 
@@ -635,16 +637,16 @@ Scope {
                                 powerFlow: batteryIndicator.powerFlow
                                 percentage: batteryIndicator.modelData.percentage
                                 chargeMode: {
-                                    const mode = barRoot.notificationControl.tlpChargeMode
+                                    const mode = barRoot.controller.tlpChargeMode
                                     if (mode === "deplacement")
                                         return "Déplacement"
                                     if (mode === "safe")
                                         return "Safe"
                                     return "Inconnu"
                                 }
-                                chargeModeIcon: barRoot.notificationControl.tlpChargeMode === "deplacement"
+                                chargeModeIcon: barRoot.controller.tlpChargeMode === "deplacement"
                                     ? "directions_walk"
-                                    : barRoot.notificationControl.tlpChargeMode === "safe"
+                                    : barRoot.controller.tlpChargeMode === "safe"
                                         ? "health_and_safety" : "battery_unknown"
                             }
 
@@ -709,9 +711,17 @@ Scope {
                     }
 
                     BarButton {
+                        id: historyButton
+                        label: barRoot.controller.notificationsMuted
+                            ? "notifications_paused" : "notifications"
+                        highlighted: panelWindow.historyOpen
+                        onClicked: panelWindow.historyOpen = !panelWindow.historyOpen
+                    }
+
+                    BarButton {
                         label: "view_cozy"
-                        highlighted: barRoot.notificationControl.panelOpen
-                        onClicked: barRoot.notificationControl.togglePanel()
+                        highlighted: barRoot.controller.panelOpen
+                        onClicked: barRoot.controller.togglePanel()
                     }
 
 
@@ -734,7 +744,15 @@ Scope {
                 anchorItem: trayButton
                 open: panelWindow.trayPopupOpen
                 barVisible: barRoot.barVisible
-                onClosed: panelWindow.trayPopupOpen = false
+                onCloseRequested: panelWindow.trayPopupOpen = false
+            }
+
+            NotificationHistoryPanel {
+                anchorItem: historyButton
+                controller: barRoot.controller
+                open: panelWindow.historyOpen
+                barVisible: barRoot.barVisible
+                onCloseRequested: panelWindow.historyOpen = false
             }
 
             LazyLoader {
@@ -758,3 +776,4 @@ Scope {
         }
     }
 }
+ 

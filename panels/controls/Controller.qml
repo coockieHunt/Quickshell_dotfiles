@@ -6,9 +6,8 @@ import Quickshell.Services.Pipewire
 import Quickshell.Services.UPower
 import QtQuick
 import "../../components"
-import "../../components/notification"
 import "../../theme"
-import "../controls"
+import "../notifications"
 
 Scope {
     id: root
@@ -149,7 +148,6 @@ Scope {
     }
 
     function setNotificationMute(durationMs) {
-        muteMenu.close()
         muteTimer.stop()
         notificationMuteUntil = durationMs < 0
             ? -1 : durationMs === 0 ? 0 : Date.now() + durationMs
@@ -738,36 +736,9 @@ Scope {
         onTriggered: root.refreshQuickSettings()
     }
 
-    PanelWindow {
-        visible: server.trackedNotifications.values.length > 0
-        anchors { top: true; right: !root.panelOpen; left: root.panelOpen }
-        margins {
-            top: Theme.barHeight + Theme.spacing
-            right: root.panelOpen ? 0 : Theme.margin
-            left: root.panelOpen ? Theme.margin : 0
-        }
-        implicitWidth: 360
-        implicitHeight: stack.implicitHeight
-        color: "transparent"
-        exclusionMode: ExclusionMode.Ignore
-        WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.namespace: "notifications"
-
-        Column {
-            id: stack
-            width: parent.width
-            spacing: Theme.spacing
-
-            Repeater {
-                model: server.trackedNotifications
-
-                delegate: NotificationToast {
-                    required property var modelData
-                    width: stack.width
-                    notification: modelData
-                }
-            }
-        }
+    NotificationToastWindow {
+        notifications: server.trackedNotifications
+        panelOpen: root.panelOpen
     }
 
     PanelWindow {
@@ -811,12 +782,12 @@ Scope {
             onDismissed: root.panelOpen = false
         }
 
-        ControlCenterPanel {
+        ControlCenter {
             anchors.fill: parent
             controller: root
         }
 
-        PerformancePanel {
+        PerformanceCenter {
             anchors.fill: parent
             controller: root
         }

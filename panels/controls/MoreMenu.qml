@@ -91,7 +91,7 @@ Item {
             hostBar.popup("pavucontrol")
             break
         case "control":
-            hostBar.notificationControl.togglePanel()
+            hostBar.controller.togglePanel()
             break
         case "macro":
             macroLocal.openPanel()

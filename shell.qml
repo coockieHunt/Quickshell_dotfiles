@@ -18,8 +18,8 @@ Scope {
     PowerMenu { id: powerMenu }
     Macro { id: macro }
     Watchers {}
-    Notifications {
-        id: notifications
+    Controller {
+        id: mainController
         performanceControl: bar.performanceSource
         macroControl: macro
     }
@@ -27,10 +27,10 @@ Scope {
 
     Bar {
         id: bar
-        barVisible: root.barVisible && !notifications.panelOpen
+        barVisible: root.barVisible && !mainController.panelOpen
         launcherControl: launcher
         wallpaperPicker: picker
-        notificationControl: notifications
+        controller: mainController
         onHideRequested: root.barVisible = false
     }
 
