@@ -69,17 +69,11 @@ Scope {
             color: "transparent"
             WlrLayershell.namespace: "quickshell-bar"
 
-            Rectangle {
+            BarBlock {
                 anchors.left: parent.left
                 anchors.top: parent.top
                 anchors.leftMargin: 5
-                width: leftContent.implicitWidth + Theme.margin * 2
-                height: Theme.barHeight
-                bottomLeftRadius: Theme.cornerRadius
-                bottomRightRadius: Theme.cornerRadius
-                color: Qt.rgba(Theme.componentBackground.r, Theme.componentBackground.g, Theme.componentBackground.b, 0.95)
-                border.width: 0.5
-                border.color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.1)
+                contentWidth: leftContent.implicitWidth
 
                 Row {
                     id: leftContent
@@ -157,16 +151,9 @@ Scope {
                         onClicked: barRoot.hideRequested()
                     }
                 }
-
-                Rectangle {
-                    anchors.top: parent.top
-                    width: parent.width
-                    height: 1
-                    color: Qt.rgba(Theme.componentBackground.r, Theme.componentBackground.g, Theme.componentBackground.b, 0.95)
-                }
             }
 
-            Rectangle {
+            BarBlock {
                 id: clockBlock
                 anchors.centerIn: parent
                 width: clockText.implicitWidth
@@ -174,12 +161,7 @@ Scope {
                     + (barRoot.controller.powerProfile === "performance" ? performanceBadge.implicitWidth + 8 : 0)
                     + (airplaneBadge.visible ? airplaneBadge.implicitWidth + 8 : 0)
                     + Theme.margin * 2
-                height: Theme.barHeight
-                bottomLeftRadius: Theme.cornerRadius
-                bottomRightRadius: Theme.cornerRadius
-                color: Qt.rgba(Theme.componentBackground.r, Theme.componentBackground.g, Theme.componentBackground.b, 0.95)
-                border.width: 0.5
-                border.color: Theme.superHighlightEnabled && barRoot.superHeld
+                borderColor: Theme.superHighlightEnabled && barRoot.superHeld
                     ? Theme.accent
                     : Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.1)
 
@@ -252,18 +234,9 @@ Scope {
                         }
                     }
 
-                    Item {
+                    BarSeparator {
                         visible: weather.available
-                        width: Theme.spacing
                         height: parent.height
-
-                        Rectangle {
-                            anchors.centerIn: parent
-                            width: 1
-                            height: Theme.buttonSize * 0.65
-                            color: Theme.buttonHover
-                            rotation: 15
-                        }
                     }
 
                     Text {
@@ -418,18 +391,9 @@ Scope {
                         }
                     }
 
-                    Item {
+                    BarSeparator {
                         visible: mediaWidget.visible
-                        width: Theme.spacing
                         height: parent.height
-
-                        Rectangle {
-                            anchors.centerIn: parent
-                            width: 1
-                            height: Theme.buttonSize * 0.65
-                            color: Theme.buttonHover
-                            rotation: 15
-                        }
                     }
 
                     MediaWidget {
@@ -437,26 +401,13 @@ Scope {
                         anchors.verticalCenter: parent.verticalCenter
                     }
                 }
-
-                Rectangle {
-                    anchors.top: parent.top
-                    width: parent.width
-                    height: 1
-                    color: Qt.rgba(Theme.componentBackground.r, Theme.componentBackground.g, Theme.componentBackground.b, 0.95)
-                }
             }
 
-            Rectangle {
+            BarBlock {
                 anchors.right: parent.right
                 anchors.top: parent.top
                 anchors.rightMargin: 5
-                width: rightContent.implicitWidth + Theme.margin * 2
-                height: Theme.barHeight
-                bottomLeftRadius: Theme.cornerRadius
-                bottomRightRadius: Theme.cornerRadius
-                color: Qt.rgba(Theme.componentBackground.r, Theme.componentBackground.g, Theme.componentBackground.b, 0.95)
-                border.width: 0.5
-                border.color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.1)
+                contentWidth: rightContent.implicitWidth
 
                 Row {
                     id: rightContent
@@ -587,18 +538,7 @@ Scope {
 
                     BarButton { label: "volume_up"; onClicked: barRoot.popup("pavucontrol") }
 
-                    Item {
-                        width: Theme.spacing
-                        height: Theme.buttonSize
-
-                        Rectangle {
-                            anchors.centerIn: parent
-                            width: 1
-                            height: Theme.buttonSize * 0.65
-                            color: Theme.buttonHover
-                            rotation: 15
-                        }
-                    }
+                    BarSeparator {}
 
                     Repeater {
                         model: UPower.devices
@@ -678,20 +618,7 @@ Scope {
                         }
                     }
 
-                    Item {
-                        width: Theme.spacing
-                        height: Theme.buttonSize
-
-                        Rectangle {
-                            anchors.centerIn: parent
-                            width: 1
-                            height: Theme.buttonSize * 0.65
-                            color: Theme.buttonHover
-                            rotation: 15
-                        }
-                    }
-
-                  
+                    BarSeparator {}
 
                     Item {
                         width: Theme.spacing
@@ -719,19 +646,10 @@ Scope {
                         onClicked: barRoot.controller.togglePanel()
                     }
 
-
                     MoreMenu {
                         id: moreMenu
                         hostBar: barRoot
                     }
-
-                }
-
-                Rectangle {
-                    anchors.top: parent.top
-                    width: parent.width
-                    height: 1
-                    color: Qt.rgba(Theme.componentBackground.r, Theme.componentBackground.g, Theme.componentBackground.b, 0.95)
                 }
             }
 
@@ -771,4 +689,3 @@ Scope {
         }
     }
 }
- 
