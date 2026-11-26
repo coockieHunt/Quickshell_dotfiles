@@ -13,6 +13,13 @@ Scope {
     property string panelMode: "notifications"
     property var macroControl: null
     property var performanceControl: null
+    property bool caffeineEnabled: false
+
+    Process {
+        id: caffeineProcess
+        command: ["systemd-inhibit", "--what=idle", "--who=Quickshell", "--why=Mode Caféine", "sleep", "infinity"]
+        running: root.caffeineEnabled
+    }
 
     NetworkService { id: network }
     AudioService { id: audioService }
@@ -81,6 +88,7 @@ Scope {
     function toggleBluetooth() { network.toggleBluetooth() }
     function toggleAirplane() { network.toggleAirplane() }
     function toggleSound() { audioService.toggleSound() }
+    function toggleCaffeine() { caffeineEnabled = !caffeineEnabled }
     function setBrightness(value) { brightnessService.setBrightness(value) }
 
     function toggleEcoMode() { power.toggleEcoMode() }

@@ -107,12 +107,14 @@ Item {
 
                 QuickSetting {
                     width: (parent.width - parent.spacing) / 2
-                    label: "Son"
-                    icon: controller.soundMuted ? "volume_off" : "volume_up"
-                    active: controller.soundStateKnown && !controller.soundMuted
-                    known: controller.soundStateKnown
-                    onClicked: controller.toggleSound()
+                    label: "Caféine"
+                    icon: "coffee"
+                    active: controller.caffeineEnabled
+                    known: true
+                    onClicked: controller.toggleCaffeine()
                 }
+
+
 
                 QuickSetting {
                     width: (parent.width - parent.spacing) / 2
@@ -164,24 +166,32 @@ Item {
 
             LevelSlider {
                 width: parent.width
-                icon: "volume_up"
+                icon: controller.soundMuted ? "volume_off" : "volume_up"
+                iconClickable: controller.soundStateKnown
+                iconDimmed: controller.soundMuted
                 value: controller.audio ? controller.audio.volume : 0
                 maximumValue: 1
                 enabled: controller.audio !== null
                 unavailableText: "0%"
+                onIconClicked: controller.toggleSound()
                 onDragged: (value) => {
                     if (controller.audio)
                         controller.audio.volume = value
                 }
             }
 
+
             LevelSlider {
                 width: parent.width
-                icon: "brightness_6"
+                icon: controller.brightness <= 0.05 ? "brightness_low" : "brightness_6"
+                iconClickable: controller.brightnessStateKnown
+                iconDimmed: controller.brightness <= 0.05
                 value: controller.brightness
                 enabled: controller.brightnessStateKnown
+                onIconClicked: controller.setBrightness(0.01)
                 onDragged: (value) => controller.setBrightness(value)
             }
+
 
         }
     }
