@@ -7,7 +7,6 @@ import QtQuick
 import "../../components"
 import "../../components/action"
 import "../../components/info"
-import "../../components/tooltip"
 import "../../theme"
 import "../../panels/services"
 import "../../panels/notifications"
@@ -351,78 +350,10 @@ Scope {
                     Repeater {
                         model: UPower.devices
 
-                        Row {
-                            id: batteryIndicator
+                        BatteryIndicator {
                             required property var modelData
-                            readonly property string batteryStatus: {
-                                if (modelData.state === UPowerDeviceState.Charging)
-                                    return "En charge"
-                                if (modelData.state === UPowerDeviceState.Discharging)
-                                    return "En décharge"
-                                if (modelData.state === UPowerDeviceState.FullyCharged)
-                                    return "Chargée"
-                                if (modelData.state === UPowerDeviceState.PendingCharge)
-                                    return "Charge en attente"
-                                if (modelData.state === UPowerDeviceState.PendingDischarge)
-                                    return "Décharge en attente"
-                                return "État inconnu"
-                            }
-                            readonly property string powerFlow: {
-                                const rate = modelData.changeRate
-                                if (rate > 0 && modelData.state === UPowerDeviceState.Charging)
-                                    return `+${Math.abs(rate).toFixed(1)} W`
-                                if (rate > 0 && modelData.state === UPowerDeviceState.Discharging)
-                                    return `-${Math.abs(rate).toFixed(1)} W`
-                                return "0 W"
-                            }
-                            visible: modelData.isLaptopBattery
-                            height: Theme.buttonSize
-                            spacing: Theme.spacing / 2
-
-                            BatteryTooltip {
-                                anchorItem: batteryIndicator
-                                shown: batteryHover.hovered
-                                status: batteryIndicator.batteryStatus
-                                powerFlow: batteryIndicator.powerFlow
-                                percentage: batteryIndicator.modelData.percentage
-                                chargeMode: {
-                                    const mode = barRoot.controller.tlpChargeMode
-                                    if (mode === "deplacement")
-                                        return "Déplacement"
-                                    if (mode === "safe")
-                                        return "Safe"
-                                    return "Inconnu"
-                                }
-                                chargeModeIcon: barRoot.controller.tlpChargeMode === "deplacement"
-                                    ? "directions_walk"
-                                    : barRoot.controller.tlpChargeMode === "safe"
-                                        ? "health_and_safety" : "battery_unknown"
-                            }
-
-                            Text {
-                                visible: modelData.state === UPowerDeviceState.Charging
-                                    || (!UPower.onBattery && (
-                                        modelData.state === UPowerDeviceState.FullyCharged
-                                        || modelData.state === UPowerDeviceState.PendingCharge
-                                    ))
-                                text: modelData.state === UPowerDeviceState.Charging ? "bolt" : "electrical_services"
-                                color: Theme.accent
-                                font.family: Theme.iconFont
-                                font.pixelSize: Theme.iconSize
-                                y: (parent.height - implicitHeight) / 2
-                            }
-
-                            Text {
-                                color: Theme.text
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSize
-                                text: `${Math.round(modelData.percentage * 100)}%`
-                                y: (parent.height - implicitHeight) / 2
-                            }
-
-                            HoverHandler {
-                                id: batteryHover
-                            }
+                            device: modelData
+                            tlpChargeMode: barRoot.controller.tlpChargeMode
                         }
                     }
 
