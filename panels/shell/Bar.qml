@@ -159,7 +159,6 @@ Scope {
                 width: clockText.implicitWidth
                     + (ecoBadge.visible ? ecoBadge.implicitWidth + 8 : 0)
                     + (barRoot.controller.powerProfile === "performance" ? performanceBadge.implicitWidth + 8 : 0)
-                    + (airplaneBadge.visible ? airplaneBadge.implicitWidth + 8 : 0)
                     + Theme.margin * 2
                 borderColor: Theme.superHighlightEnabled && barRoot.superHeld
                     ? Theme.accent
@@ -356,41 +355,6 @@ Scope {
                         }
                     }
 
-                    Rectangle {
-                        id: airplaneBadge
-                        visible: barRoot.controller.airplaneEnabled
-                        width: airplaneBadgeContent.implicitWidth + 10
-                        height: 20
-                        y: (parent.height - height) / 2
-                        color: "transparent"
-
-                        Row {
-                            id: airplaneBadgeContent
-                            anchors.centerIn: parent
-
-                            Text {
-                                text: "airplanemode_active"
-                                color: Theme.accent
-                                font.family: Theme.iconFont
-                                font.pixelSize: Theme.iconSize - 2
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-                        }
-
-                        PopupTooltip {
-                            anchorItem: airplaneBadge
-                            shown: airplaneBadgeMouse.containsMouse
-                            text: "Wi-Fi et Bluetooth désactivés"
-                        }
-
-                        MouseArea {
-                            id: airplaneBadgeMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            acceptedButtons: Qt.NoButton
-                        }
-                    }
-
                     BarSeparator {
                         visible: mediaWidget.visible
                         height: parent.height
@@ -503,36 +467,6 @@ Scope {
                                 : !barRoot.controller.bluetoothEnabled
                                     ? ""
                                     : barRoot.controller.bluetoothConnectedNames || "Aucun appareil"
-                        }
-                    }
-
-                    Item {
-                        id: airplaneIndicator
-                        visible: barRoot.controller.airplaneEnabled
-                        width: visible ? Theme.buttonSize : 0
-                        height: Theme.buttonSize
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "airplanemode_active"
-                            color: Theme.accent
-                            font.family: Theme.iconFont
-                            font.pixelSize: Theme.iconSize
-                        }
-
-                        PopupTooltip {
-                            anchorItem: airplaneIndicator
-                            shown: airplaneHover.containsMouse
-                            title: "Mode avion"
-                            icon: "airplanemode_active"
-                            text: "Wi-Fi et Bluetooth désactivés"
-                        }
-
-                        MouseArea {
-                            id: airplaneHover
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            acceptedButtons: Qt.NoButton
                         }
                     }
 
