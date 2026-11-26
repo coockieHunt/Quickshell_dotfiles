@@ -10,6 +10,7 @@ Scope {
     property double notificationMuteUntil: 0
     property int muteClockTick: 0
     property string muteMessage: ""
+    readonly property int notificationCount: history.length
     readonly property bool notificationsMuted: notificationMuteUntil === -1
         || notificationMuteUntil > Date.now()
     readonly property string muteTimeRemaining: {

@@ -85,6 +85,32 @@ BarBlock {
                 ? "notifications_paused" : "notifications"
             highlighted: root.historyOpen
             onClicked: root.historyClicked()
+
+            Rectangle {
+                id: badge
+                readonly property int count: root.hostBar.notificationController.notificationCount
+                visible: count > 0
+                anchors.bottom: parent.bottom
+                anchors.right: parent.right
+                anchors.bottomMargin: -3
+                anchors.rightMargin: -3
+                width: Math.max(height, badgeText.implicitWidth + 6)
+                height: 13
+                radius: height / 2
+                color: Theme.accent
+                border.width: 1
+                border.color: Theme.bg
+
+                Text {
+                    id: badgeText
+                    anchors.centerIn: parent
+                    text: badge.count > 99 ? "99+" : badge.count
+                    color: Theme.textOnAccent
+                    font.family: Theme.fontFamily
+                    font.pixelSize: 9
+                    font.bold: true
+                }
+            }
         }
 
         BarButton {
