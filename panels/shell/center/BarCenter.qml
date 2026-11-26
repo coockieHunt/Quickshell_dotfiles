@@ -1,5 +1,6 @@
 import QtQuick
 import "../../../components"
+import "../../../components/action"
 import "../../../components/info"
 import "../../../theme"
 import "../../apps"
@@ -127,12 +128,20 @@ BarBlock {
             text: Qt.formatDateTime(root.systemClock.date, "HH:mm")
         }
 
+        BarSeparator {
+            visible: ecoBadge.visible || performanceBadge.visible
+                || caffeineButton.visible || airplaneButton.visible
+            height: parent.height
+        }
+
         StatusBadge {
             id: ecoBadge
             visible: root.hostBar.controller.ecoModeActive
                 || root.hostBar.controller.powerProfile === "power-saver"
             icon: "eco"
             label: "ÉCO"
+            tooltipTitle: "Mode Économie"
+            tooltipText: "Consommation réduite.\nClic pour revenir au mode équilibré."
             onClicked: root.hostBar.controller.returnToBalancedProfile()
         }
 
@@ -141,8 +150,31 @@ BarBlock {
             visible: root.hostBar.controller.powerProfile === "performance"
             icon: "bolt"
             label: "MAX"
+            tooltipTitle: "Mode Performance"
+            tooltipText: "Performances maximales.\nClic pour revenir au mode équilibré."
             onClicked: root.hostBar.controller.returnToBalancedProfile()
         }
+
+        BarButton {
+            id: caffeineButton
+            anchors.verticalCenter: parent.verticalCenter
+            visible: root.hostBar.controller.caffeineEnabled
+            label: "coffee"
+            iconColor: Theme.accent
+            tooltip: "Mode Caféine\nLa mise en veille est bloquée.\nClic pour désactiver."
+            onClicked: root.hostBar.controller.caffeineEnabled = false
+        }
+
+        BarButton {
+            id: airplaneButton
+            anchors.verticalCenter: parent.verticalCenter
+            visible: root.hostBar.controller.airplaneEnabled
+            label: "airplanemode_active"
+            iconColor: Theme.accent
+            tooltip: "Mode Avion\nWi-Fi et Bluetooth désactivés.\nClic pour désactiver."
+            onClicked: root.hostBar.controller.toggleAirplane()
+        }
+
 
         BarSeparator {
             visible: mediaWidget.visible
