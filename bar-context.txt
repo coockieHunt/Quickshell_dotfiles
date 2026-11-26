@@ -1,0 +1,1100 @@
+=================== components/action/BarButton.qml ===================
+import QtQuick
+import "../info"
+import "../../theme"
+
+Rectangle {
+    id: root
+    property string label: ""
+    property string iconFont: Theme.iconFont
+    property string tooltip: ""
+    property int iconSize: Theme.iconSize
+    property bool highlighted: false
+    property color idleColor: highlighted ? Theme.accent : "transparent"
+    property color hoverColor: "transparent"
+    property color iconColor: highlighted ? Theme.textOnAccent : Theme.text
+    property color hoverIconColor: Theme.accent
+    readonly property bool hovered: mouse.containsMouse
+    signal clicked()
+    signal rightClicked()
+    signal middleClicked()
+
+    width: Theme.buttonSize
+    height: Theme.buttonSize
+    radius: Theme.cornerRadius
+    color: mouse.containsMouse ? hoverColor : idleColor
+
+    PopupTooltip {
+        anchorItem: root
+        text: root.tooltip
+        shown: mouse.containsMouse
+    }
+
+    Text {
+        anchors.centerIn: parent
+        text: root.label
+        color: mouse.containsMouse ? root.hoverIconColor : root.iconColor
+        font.family: root.iconFont
+        font.pixelSize: root.iconSize
+
+        Behavior on color {
+            ColorAnimation { duration: 120 }
+        }
+    }
+
+    MouseArea {
+        id: mouse
+        anchors.fill: parent
+        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onClicked: mouse => {
+            if (mouse.button === Qt.RightButton)
+                root.rightClicked()
+            else if (mouse.button === Qt.MiddleButton)
+                root.middleClicked()
+            else
+                root.clicked()
+        }
+    }
+}
+
+=================== components/tooltip/ConnectivityTooltip.qml ===================
+import QtQuick
+import Quickshell
+import "../../theme"
+
+PopupWindow {
+    id: root
+
+    required property Item anchorItem
+    property bool shown: false
+    property string title: ""
+    property string icon: ""
+    property string status: ""
+    property string detail: ""
+
+    anchor.window: anchorItem.QsWindow.window
+    anchor.adjustment: PopupAdjustment.None
+    anchor.gravity: Edges.Bottom | Edges.Right
+    anchor.onAnchoring: {
+        const content = anchorItem.QsWindow.contentItem
+        const pos = content.mapFromItem(
+            anchorItem,
+            anchorItem.width / 2 - root.width / 2,
+            anchorItem.height + 4
+        )
+        const maxX = Math.max(4, content.width - root.width - 4)
+        anchor.rect.x = Math.max(4, Math.min(pos.x, maxX))
+        anchor.rect.y = pos.y + Theme.dropdownGap
+    }
+
+    visible: shown
+    color: "transparent"
+    implicitWidth: 220
+    implicitHeight: 88
+
+    Rectangle {
+        anchors.fill: parent
+        color: Theme.componentBackground
+        radius: Theme.cornerRadius
+        border.color: Theme.componentBorder
+        border.width: 1
+    }
+
+    Row {
+        anchors.fill: parent
+        anchors.margins: 12
+        spacing: 8
+
+        Column {
+            width: parent.width - statusIcon.width - parent.spacing
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 4
+
+            Text {
+                text: root.title
+                color: Theme.text
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
+                font.weight: Font.DemiBold
+            }
+
+            Text {
+                width: parent.width
+                text: root.detail
+                visible: root.detail.length > 0
+                color: Theme.text
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize - 1
+                font.weight: Font.Medium
+                elide: Text.ElideRight
+            }
+
+            Text {
+                text: root.status
+                color: Theme.text
+                opacity: 0.7
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize - 3
+            }
+        }
+
+        Text {
+            id: statusIcon
+            anchors.verticalCenter: parent.verticalCenter
+            text: root.icon
+            color: Theme.accent
+            font.family: Theme.iconFont
+            font.pixelSize: Theme.iconSize + 6
+        }
+    }
+}
+
+=================== components/tooltip/BatteryTooltip.qml ===================
+import QtQuick
+import Quickshell
+import "../../theme"
+
+PopupWindow {
+    id: root
+
+    required property Item anchorItem
+    property bool shown: false
+    property string status: ""
+    property string powerFlow: "0 W"
+    property real percentage: 0
+    property string chargeMode: "Indéterminé"
+    property string chargeModeIcon: "battery_unknown"
+
+    anchor.window: anchorItem.QsWindow.window
+    anchor.adjustment: PopupAdjustment.None
+    anchor.gravity: Edges.Bottom | Edges.Right
+    anchor.onAnchoring: {
+        const content = anchorItem.QsWindow.contentItem
+        const pos = content.mapFromItem(
+            anchorItem,
+            anchorItem.width / 2 - root.width / 2,
+            anchorItem.height + 4
+        )
+        const maxX = Math.max(4, content.width - root.width - 4)
+        anchor.rect.x = Math.max(4, Math.min(pos.x, maxX))
+        anchor.rect.y = pos.y + Theme.dropdownGap
+    }
+
+    visible: shown
+    color: "transparent"
+    implicitWidth: 220
+    implicitHeight: 112
+
+    Rectangle {
+        anchors.fill: parent
+        color: Theme.componentBackground
+        radius: Theme.cornerRadius
+        border.color: Theme.componentBorder
+        border.width: 1
+    }
+
+    Column {
+        anchors.fill: parent
+        anchors.margins: 12
+        spacing: 8
+
+        Row {
+            width: parent.width
+
+            Text {
+                id: title
+                text: "Batterie"
+                color: Theme.text
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
+                font.weight: Font.DemiBold
+            }
+
+            Item {
+                width: parent.width - title.implicitWidth - statusText.implicitWidth
+                height: 1
+            }
+
+            Text {
+                id: statusText
+                text: root.status
+                color: Theme.text
+                opacity: 0.7
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize - 2
+            }
+        }
+
+        Row {
+            width: parent.width
+            height: 54
+
+            Column {
+                id: powerColumn
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 1
+
+                Text {
+                    text: root.powerFlow
+                    color: Theme.accent
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize + 5
+                    font.weight: Font.DemiBold
+                }
+
+                Text {
+                    text: `${Math.round(root.percentage * 100)} %`
+                    color: Theme.text
+                    opacity: 0.7
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize - 2
+                }
+            }
+
+            Item {
+                width: parent.width - powerColumn.width - modeColumn.width
+                height: 1
+            }
+
+            Column {
+                id: modeColumn
+                width: 88
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 2
+
+                Text {
+                    width: parent.width
+                    text: root.chargeModeIcon
+                    color: Theme.accent
+                    font.family: Theme.iconFont
+                    font.pixelSize: Theme.iconSize + 4
+                    horizontalAlignment: Text.AlignRight
+                }
+
+                Text {
+                    width: parent.width
+                    text: root.chargeMode
+                    color: Theme.text
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize - 2
+                    font.weight: Font.Medium
+                    horizontalAlignment: Text.AlignRight
+                    elide: Text.ElideRight
+                }
+            }
+        }
+    }
+}
+
+=================== components/info/PopupTooltip.qml ===================
+import QtQuick
+import Quickshell
+import "../../theme"
+
+PopupWindow {
+    id: root
+
+    required property Item anchorItem
+    property string text: ""
+    property string title: ""
+    property string icon: ""
+    property bool shown: false
+    property var rows: []
+
+    anchor.window: anchorItem.QsWindow.window
+    anchor.adjustment: PopupAdjustment.None
+    anchor.gravity: Edges.Bottom | Edges.Right
+    anchor.onAnchoring: {
+        const content = anchorItem.QsWindow.contentItem
+        const pos = content.mapFromItem(
+            anchorItem,
+            anchorItem.width / 2 - root.width / 2,
+            anchorItem.height + 4
+        )
+        const maxX = Math.max(4, content.width - root.width - 4)
+        anchor.rect.x = Math.max(4, Math.min(pos.x, maxX))
+        anchor.rect.y = pos.y + Theme.dropdownGap
+    }
+
+    visible: shown && (text.length > 0 || rows.length > 0)
+    color: "transparent"
+    implicitWidth: 264
+    implicitHeight: (title.length > 0
+        ? tooltipHeader.implicitHeight
+            + (rows.length > 0 ? tooltipRows.implicitHeight + 8
+                : text.length > 0 ? tooltipText.implicitHeight + 8 : 0)
+        : rows.length > 0 ? tooltipRows.implicitHeight : tooltipText.implicitHeight) + 20
+
+    Rectangle {
+        anchors.fill: parent
+        color: Theme.componentBackground
+        radius: Theme.cornerRadius
+        border.color: Theme.componentBorder
+        border.width: 1
+    }
+
+    Column {
+        anchors.centerIn: parent
+        spacing: 8
+
+        Row {
+            id: tooltipHeader
+            spacing: 7
+            visible: root.title.length > 0
+
+            Text {
+                text: root.icon
+                visible: text.length > 0
+                color: Theme.accent
+                font.family: Theme.iconFont
+                font.pixelSize: Theme.iconSize + 2
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Text {
+                text: root.title
+                color: Theme.text
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
+                font.weight: Font.DemiBold
+                anchors.verticalCenter: parent.verticalCenter
+            }
+        }
+
+        Text {
+            id: tooltipText
+            text: root.text
+            width: 240
+            color: Theme.text
+            font.family: Theme.fontFamily
+            font.pixelSize: Theme.fontSize
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            visible: root.rows.length === 0
+        }
+
+        Column {
+            id: tooltipRows
+            width: 240
+            spacing: 10
+            visible: root.rows.length > 0
+
+            Repeater {
+                model: root.rows
+
+                Column {
+                    required property var modelData
+                    width: tooltipRows.width
+                    spacing: 2
+
+                    Row {
+                        width: parent.width
+                        spacing: 6
+
+                        Text {
+                            text: modelData.icon || ""
+                            visible: text.length > 0
+                            width: visible ? 18 : 0
+                            color: Theme.accent
+                            font.family: Theme.iconFont
+                            font.pixelSize: Theme.iconSize
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+
+                        Text {
+                            width: parent.width - (modelData.icon ? 24 : 0)
+                            text: `${modelData.label}:`
+                            color: Theme.text
+                            opacity: 0.75
+                            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSize
+                        }
+                    }
+
+                    Text {
+                        width: parent.width
+                        text: modelData.value
+                        color: Theme.text
+                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSize
+                        font.weight: Font.Medium
+                    }
+                }
+            }
+        }
+    }
+}
+
+=================== panels/controls/MoreMenu.qml ===================
+import QtQuick
+import QtQuick.Controls
+import Quickshell
+import Quickshell.Io
+import Quickshell.Wayland
+import "../../components"
+import "../../components/action"
+import "../../theme"
+import "ControlCenter/services"
+import "../services"
+import "../shell"
+
+Item {
+    id: root
+
+    width: moreButton.width
+    height: moreButton.height
+
+    property string expandedMenu: ""
+    property bool confirmReload: false
+
+    required property var hostBar
+
+    Macro {
+        id: macroLocal
+    }
+
+    Process {
+        id: openConfigWithDefaultApp
+        command: ["xdg-open", Theme.configFilePath]
+        onExited: (exitCode) => {
+            if (exitCode !== 0)
+                openConfigWithEditor.running = true
+        }
+    }
+
+    Process {
+        id: openConfigWithEditor
+        command: [Theme.textEditorApplication, Theme.configFilePath]
+    }
+
+    PanelWindow {
+        id: confirmWindow
+
+        visible: root.confirmReload
+        color: "transparent"
+        exclusionMode: ExclusionMode.Ignore
+
+        WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.keyboardFocus: root.confirmReload
+            ? WlrKeyboardFocus.Exclusive
+            : WlrKeyboardFocus.None
+
+        anchors {
+            top: true
+            bottom: true
+            left: true
+            right: true
+        }
+
+        ConfirmDialog {
+            anchors.fill: parent
+
+            opened: root.confirmReload
+            title: "Recharger Quickshell ?"
+            message: "L’interface va se recharger. Les panneaux ouverts seront fermés."
+            confirmText: "Recharger"
+
+            onConfirmed: {
+                root.confirmReload = false
+                Quickshell.reload(true)
+            }
+            onCancelled: root.confirmReload = false
+        }
+    }
+
+    function runAction(action) {
+        switch (action) {
+        case "launcher":
+            hostBar.launcherControl.toggle()
+            break
+        case "wallpaper":
+            hostBar.wallpaperPicker.toggle()
+            break
+        case "wifi":
+            hostBar.popup(Theme.wifiApplication)
+            break
+        case "bluetooth":
+            hostBar.popup(Theme.bluetoothApplication)
+            break
+        case "audio":
+            hostBar.popup("pavucontrol")
+            break
+        case "control":
+            hostBar.controller.togglePanel()
+            break
+        case "macro":
+            macroLocal.openPanel()
+            break
+        case "openSetting":
+            openConfigWithDefaultApp.running = true
+            break
+        case "reload_qs":
+            confirmReload = true
+            break
+        case "lock":
+            Quickshell.execDetached(["hyprlock"])
+            break
+        case "shutdown":
+            Quickshell.execDetached(["systemctl", "poweroff"])
+            break
+        case "full_menu":
+            Quickshell.execDetached(["qs", "ipc", "call", "power", "toggle"])
+            break
+        }
+
+        menuWindow.visible = false
+    }
+
+    BarButton {
+        id: moreButton
+
+        label: "menu"
+        highlighted: menuWindow.visible
+        onClicked: menuWindow.visible = !menuWindow.visible
+    }
+
+    Connections {
+        target: menuWindow
+
+        function onVisibleChanged() {
+            if (menuWindow.visible)
+                enterAnimation.restart()
+            else
+                root.expandedMenu = ""
+        }
+    }
+
+    ParallelAnimation {
+        id: enterAnimation
+
+        NumberAnimation {
+            target: panel
+            property: "opacity"
+            from: 0
+            to: 1
+            duration: 140
+            easing.type: Easing.OutCubic
+        }
+
+        NumberAnimation {
+            target: panel
+            property: "y"
+            from: -6
+            to: 0
+            duration: 160
+            easing.type: Easing.OutCubic
+        }
+    }
+
+    PopupWindow {
+        id: menuWindow
+
+        anchor.window: moreButton.QsWindow.window
+        anchor.adjustment: PopupAdjustment.None
+        anchor.gravity: Edges.Bottom | Edges.Right
+
+        anchor.onAnchoring: {
+            const content = moreButton.QsWindow.contentItem
+
+            const buttonPos = content.mapFromItem(moreButton, 0, 0)
+
+            const wantedX = buttonPos.x
+                + (moreButton.width - menuWindow.width) / 2
+
+            anchor.rect.x = Math.max(
+                4,
+                Math.min(wantedX, content.width - menuWindow.width - 4)
+            )
+
+            anchor.rect.y = buttonPos.y + moreButton.height + Theme.dropdownGap
+        }
+
+        visible: false
+        grabFocus: true
+        implicitWidth: 250
+        implicitHeight: menuContent.implicitHeight + 20
+        color: "transparent"
+
+        Rectangle {
+            id: panel
+
+            width: parent.width
+            height: parent.height
+            radius: Theme.cornerRadius
+            color: Theme.componentBackground
+            border.width: 1
+            border.color: Theme.componentBorder
+
+            Column {
+                id: menuContent
+
+                anchors.fill: parent
+                anchors.margins: 10
+                spacing: 4
+
+                Repeater {
+                    model: [
+                        {
+                            title: "Applications",
+                            icon: "apps",
+                            items: [
+                                { label: "Lanceur", action: "launcher" },
+                                { label: "Fond d’écran", action: "wallpaper" }
+                            ]
+                        },
+                        {
+                            title: "Connectivité",
+                            icon: "wifi",
+                            items: [
+                                { label: "Wi-Fi", action: "wifi" },
+                                { label: "Bluetooth", action: "bluetooth" }
+                            ]
+                        },
+                        {
+                            title: "Système",
+                            icon: "settings",
+                            items: [
+                                { label: "Audio", action: "audio" },
+                                { label: "Centre de contrôle", action: "control" },
+                                { label: "Macro", action: "macro" },
+                                { label: "Configuration", action: "openSetting" },
+                                { label: "Recharger Qs", action: "reload_qs" }
+                            ]
+                        }
+                    ]
+
+                    delegate: Column {
+                        id: category
+
+                        required property var modelData
+                        readonly property bool isOpen:
+                            root.expandedMenu === modelData.title
+
+                        Rectangle {
+                            width: menuContent.width
+                            height: 40
+                            radius: Theme.cornerRadius
+                            color: category.isOpen
+                                ? Qt.rgba(
+                                      Theme.accent.r,
+                                      Theme.accent.g,
+                                      Theme.accent.b,
+                                      0.10
+                                  )
+                                : categoryMouse.containsMouse
+                                    ? Theme.buttonHover
+                                    : "transparent"
+
+                            Behavior on color {
+                                ColorAnimation { duration: 120 }
+                            }
+
+                            Rectangle {
+                                id: iconBox
+
+                                anchors.left: parent.left
+                                anchors.leftMargin: 7
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 28
+                                height: 28
+                                radius: Math.min(Theme.cornerRadius, 8)
+                                color: Qt.rgba(
+                                    Theme.accent.r,
+                                    Theme.accent.g,
+                                    Theme.accent.b,
+                                    category.isOpen ? 0.24 : 0.12
+                                )
+
+                                Behavior on color {
+                                    ColorAnimation { duration: 120 }
+                                }
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: category.modelData.icon
+                                    color: Theme.accent
+                                    font.family: Theme.iconFont
+                                    font.pixelSize: Theme.iconSize - 2
+                                }
+                            }
+
+                            Text {
+                                anchors.left: iconBox.right
+                                anchors.leftMargin: 10
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: category.modelData.title
+                                color: category.isOpen ? Theme.accent : Theme.text
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSize
+                                font.weight: category.isOpen
+                                    ? Font.DemiBold
+                                    : Font.Normal
+
+                                Behavior on color {
+                                    ColorAnimation { duration: 120 }
+                                }
+                            }
+
+                            Text {
+                                anchors.right: parent.right
+                                anchors.rightMargin: 10
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "expand_more"
+                                color: category.isOpen ? Theme.accent : Theme.text
+                                opacity: category.isOpen
+                                    || categoryMouse.containsMouse ? 1 : 0.6
+                                rotation: category.isOpen ? 180 : 0
+                                font.family: Theme.iconFont
+                                font.pixelSize: Theme.iconSize - 2
+
+                                Behavior on rotation {
+                                    NumberAnimation {
+                                        duration: 160
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
+
+                                Behavior on opacity {
+                                    NumberAnimation { duration: 120 }
+                                }
+                            }
+
+                            MouseArea {
+                                id: categoryMouse
+
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+
+                                onClicked: {
+                                    root.expandedMenu = category.isOpen
+                                        ? ""
+                                        : category.modelData.title
+                                }
+                            }
+                        }
+
+                        Item {
+                            width: menuContent.width
+                            height: category.isOpen
+                                ? subList.implicitHeight + 6
+                                : 0
+                            visible: height > 0
+                            opacity: category.isOpen ? 1 : 0
+                            clip: true
+
+                            Behavior on height {
+                                NumberAnimation {
+                                    duration: 170
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
+
+                            Behavior on opacity {
+                                NumberAnimation { duration: 140 }
+                            }
+
+                            Rectangle {
+                                x: 20
+                                y: 5
+                                width: 1
+                                height: parent.height - 8
+                                color: Qt.rgba(
+                                    Theme.accent.r,
+                                    Theme.accent.g,
+                                    Theme.accent.b,
+                                    0.3
+                                )
+                            }
+
+                            Column {
+                                id: subList
+
+                                y: 4
+                                width: parent.width
+                                spacing: 2
+
+                                Repeater {
+                                    model: category.modelData.items
+
+                                    delegate: Rectangle {
+                                        id: subItem
+
+                                        required property var modelData
+
+                                        width: subList.width
+                                        height: 32
+                                        radius: Theme.cornerRadius
+                                        color: actionMouse.containsMouse
+                                            ? Theme.buttonHover
+                                            : "transparent"
+
+                                        Behavior on color {
+                                            ColorAnimation { duration: 100 }
+                                        }
+
+                                        Text {
+                                            anchors.left: parent.left
+                                            anchors.leftMargin: 38
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            text: subItem.modelData.label
+                                            color: actionMouse.containsMouse
+                                                ? Theme.accent
+                                                : Theme.text
+                                            font.family: Theme.fontFamily
+                                            font.pixelSize: Theme.fontSize
+
+                                            Behavior on color {
+                                                ColorAnimation { duration: 100 }
+                                            }
+                                        }
+
+                                        MouseArea {
+                                            id: actionMouse
+
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: root.runAction(
+                                                subItem.modelData.action
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Item {
+                    width: menuContent.width
+                    height: 9
+
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: parent.width - 16
+                        height: 1
+                        color: Qt.rgba(
+                            Theme.accent.r,
+                            Theme.accent.g,
+                            Theme.accent.b,
+                            0.15
+                        )
+                    }
+                }
+
+                Row {
+                    width: menuContent.width
+                    spacing: 6
+
+                    Repeater {
+                        model: [
+                            {
+                                icon: "power_settings_new",
+                                action: "shutdown",
+                                color: "#fb4934"
+                            },
+                            {
+                                icon: "lock",
+                                action: "lock",
+                                color: "#83a598"
+                            },
+                            {
+                                icon: "more_horiz",
+                                action: "full_menu",
+                                color: Theme.accent
+                            }
+                        ]
+
+                        delegate: Rectangle {
+                            id: quickButton
+
+                            required property var modelData
+                            readonly property color actionColor:
+                                Qt.color(modelData.color)
+
+                            width: (menuContent.width - 12) / 3
+                            height: 40
+                            radius: Theme.cornerRadius
+                            color: Qt.rgba(
+                                actionColor.r,
+                                actionColor.g,
+                                actionColor.b,
+                                bottomButtonMouse.containsMouse ? 0.24 : 0.10
+                            )
+
+                            Behavior on color {
+                                ColorAnimation { duration: 120 }
+                            }
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: quickButton.modelData.icon
+                                color: quickButton.actionColor
+                                font.family: Theme.iconFont
+                                font.pixelSize: Theme.iconSize
+                            }
+
+                            MouseArea {
+                                id: bottomButtonMouse
+
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.runAction(
+                                    quickButton.modelData.action
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+=================== shell.qml ===================
+import Quickshell
+import Quickshell.Io
+import "panels/apps"
+import "panels/controls"
+import "panels/controls/ControlCenter"
+//import "panels/controls/Bar"
+import "panels/desktop"
+import "panels/notifications"
+import "panels/services"
+import "panels/shell"
+
+
+Scope {
+    id: root
+    property bool barVisible: true
+    LoadingScreen {}
+    Wallpaper {}
+    DriftBackdrop {}
+    Launcher { id: launcher }
+    WallpaperPicker { id: picker }
+    PowerMenu { id: powerMenu }
+    Macro { id: macro }
+    Watchers {}
+    Controller {
+        id: mainController
+        performanceControl: bar.performanceSource
+        macroControl: macro
+    }
+    NotificationController {
+        id: notificationBackend
+        panelOpen: mainController.panelOpen
+    }
+    OSD {}
+
+    Bar {
+        id: bar
+        barVisible: root.barVisible && !mainController.panelOpen
+        launcherControl: launcher
+        wallpaperPicker: picker
+        controller: mainController
+        notificationController: notificationBackend
+        onHideRequested: root.barVisible = false
+    }
+
+    IpcHandler {
+        target: "bar"
+        function toggle(): void { root.barVisible = !root.barVisible }
+        function show(): void { root.barVisible = true }
+        function hide(): void { root.barVisible = false }
+    }
+}
+
+=================== panels/controls/ControlCenter/Controller.qml (propriétés / signaux / fonctions) ===================
+10:    id: root
+12:    property bool panelOpen: false
+13:    property string panelMode: "notifications"
+14:    property var macroControl: null
+15:    property var performanceControl: null
+22:        id: power
+26:    readonly property bool wifiEnabled: network.wifiEnabled
+27:    readonly property bool bluetoothEnabled: network.bluetoothEnabled
+28:    readonly property string wifiNetworkName: network.wifiNetworkName
+29:    readonly property string bluetoothConnectedNames: network.bluetoothConnectedNames
+30:    readonly property bool wifiStateKnown: network.wifiStateKnown
+31:    readonly property bool bluetoothStateKnown: network.bluetoothStateKnown
+32:    readonly property bool airplaneEnabled: network.airplaneEnabled
+34:    readonly property bool soundMuted: audioService.soundMuted
+35:    readonly property bool soundStateKnown: audioService.soundStateKnown
+36:    readonly property var audio: audioService.audio
+38:    readonly property real brightness: brightnessService.brightness
+39:    readonly property bool brightnessStateKnown: brightnessService.brightnessStateKnown
+41:    readonly property string powerProfile: power.powerProfile
+42:    readonly property bool ecoModeActive: power.ecoModeActive
+43:    readonly property string tlpChargeMode: power.tlpChargeMode
+44:    readonly property bool tlpChargeCommandRunning: power.tlpChargeCommandRunning
+46:    function togglePanel() {
+55:    function showPanelMode(mode) {
+61:        function toggle(): void { root.togglePanel() }
+62:        function show(): void {
+67:        function hide(): void { root.panelOpen = false }
+70:    function refreshQuickSettings() {
+76:    function refreshNetworkStatus() {
+80:    function toggleWifi() { network.toggleWifi() }
+81:    function toggleBluetooth() { network.toggleBluetooth() }
+82:    function toggleAirplane() { network.toggleAirplane() }
+83:    function toggleSound() { audioService.toggleSound() }
+84:    function setBrightness(value) { brightnessService.setBrightness(value) }
+86:    function toggleEcoMode() { power.toggleEcoMode() }
+87:    function handlePowerProfileSelected(profile) { power.handlePowerProfileSelected(profile) }
+88:    function setTlpChargeMode(mode) {
+92:    function refreshTlpChargeMode() { power.refreshTlpChargeMode() }
+127:            id: keyHandler
+192:                        required property var modelData
+226:                            id: modeMouse
+
+=================== panels/services/WeatherService.qml (propriétés / signaux / fonctions) ===================
+6:    id: root
+8:    property real latitude: Theme.weather.latitude
+9:    property real longitude: Theme.weather.longitude
+11:    readonly property bool active: Theme.weather.enabled && Theme.configRevision > 0
+13:    property bool available: false
+15:    property real temperature: 0
+16:    property real feelsLike: 0
+17:    property real humidity: 0
+18:    property real windSpeed: 0
+19:    property int weatherCode: 0
+20:    property bool isDay: true
+22:    property var daily: []
+24:    readonly property string temperatureText: Math.round(temperature) + "°"
+25:    readonly property string feelsLikeText: Math.round(feelsLike) + "°"
+26:    readonly property string humidityText: Math.round(humidity) + " %"
+27:    readonly property string windText: Math.round(windSpeed) + " km/h"
+28:    readonly property string icon: iconFor(weatherCode, isDay)
+29:    readonly property string description: descriptionFor(weatherCode)
+31:    function iconFor(code, day) {
+49:    function descriptionFor(code) {
+83:    function refresh() {
+155:        id: fetchSoon
+169:        id: retryTimer
+
+=================== Usages de barRoot / hostBar ===================
+./panels/controls/MoreMenu.qml:22:    required property var hostBar
+./panels/controls/MoreMenu.qml:80:            hostBar.launcherControl.toggle()
+./panels/controls/MoreMenu.qml:83:            hostBar.wallpaperPicker.toggle()
+./panels/controls/MoreMenu.qml:86:            hostBar.popup(Theme.wifiApplication)
+./panels/controls/MoreMenu.qml:89:            hostBar.popup(Theme.bluetoothApplication)
+./panels/controls/MoreMenu.qml:92:            hostBar.popup("pavucontrol")
+./panels/controls/MoreMenu.qml:95:            hostBar.controller.togglePanel()
+
+=================== Usages de Calandar ===================
+./panels/shell/Bar.qml:756:                Calandar {
+./bar-context.sh:36:echo "=================== Usages de Calandar ===================" >> "$OUT"
+./bar-context.sh:37:grep -rn "Calandar" --include=*.qml --include=*.jsonc --include=*.sh --include=*.md . >> "$OUT"
+
+=================== Usages de Bar { (instanciation) ===================
+./shell.qml:35:    Bar {
+
+=================== Imports de la Bar actuelle ===================
+./panels/controls/ControlCenter/ControlCenter.qml:7:import "../../shell"
+./panels/controls/MoreMenu.qml:11:import "../shell"
+./shell.qml:10:import "panels/shell"
