@@ -85,6 +85,7 @@ Scope {
 
     function toggleEcoMode() { power.toggleEcoMode() }
     function handlePowerProfileSelected(profile) { power.handlePowerProfileSelected(profile) }
+    function returnToBalancedProfile() { power.returnToBalancedProfile() }
     function setTlpChargeMode(mode) {
         panelOpen = false
         power.setTlpChargeMode(mode)

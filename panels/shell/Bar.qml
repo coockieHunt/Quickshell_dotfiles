@@ -13,6 +13,8 @@ import "../../panels/services"
 import "../../panels/notifications"
 import "../apps"
 import "../controls"
+import "center"
+import "right"
 
 Scope {
     id: barRoot
@@ -274,85 +276,21 @@ Scope {
                         text: Qt.formatDateTime(clock.date, "HH:mm")
                     }
 
-                    Rectangle {
+                    StatusBadge {
                         id: ecoBadge
                         visible: barRoot.controller.ecoModeActive
                             || barRoot.controller.powerProfile === "power-saver"
-                        width: ecoBadgeContent.implicitWidth + 10
-                        height: 20
-                        y: (parent.height - height) / 2
-                        color: "transparent"
-
-                        Row {
-                            id: ecoBadgeContent
-                            anchors.centerIn: parent
-                            spacing: 3
-
-                            Text {
-                                text: "eco"
-                                color: Theme.accent
-                                font.family: Theme.iconFont
-                                font.pixelSize: Theme.iconSize - 2
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-
-                            Text {
-                                text: "ÉCO"
-                                color: Theme.accent
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSize - 4
-                                font.weight: Font.DemiBold
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-                        }
-
-                        MouseArea {
-                            id: ecoBadgeMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: barRoot.controller.returnToBalancedProfile()
-                        }
+                        icon: "eco"
+                        label: "ÉCO"
+                        onClicked: barRoot.controller.returnToBalancedProfile()
                     }
 
-                    Rectangle {
+                    StatusBadge {
                         id: performanceBadge
                         visible: barRoot.controller.powerProfile === "performance"
-                        width: performanceBadgeContent.implicitWidth + 10
-                        height: 20
-                        y: (parent.height - height) / 2
-                        color: "transparent"
-
-                        Row {
-                            id: performanceBadgeContent
-                            anchors.centerIn: parent
-                            spacing: 3
-
-                            Text {
-                                text: "bolt"
-                                color: Theme.accent
-                                font.family: Theme.iconFont
-                                font.pixelSize: Theme.iconSize - 2
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-
-                            Text {
-                                text: "MAX"
-                                color: Theme.accent
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSize - 4
-                                font.weight: Font.DemiBold
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-                        }
-
-                        MouseArea {
-                            id: performanceBadgeMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: barRoot.controller.returnToBalancedProfile()
-                        }
+                        icon: "bolt"
+                        label: "MAX"
+                        onClicked: barRoot.controller.returnToBalancedProfile()
                     }
 
                     BarSeparator {
@@ -378,95 +316,31 @@ Scope {
                     anchors.centerIn: parent
                     spacing: Theme.spacing / 2
 
-                    Item {
-                        width: wifiButton.width
-                        height: wifiButton.height
-
-                        BarButton {
-                            id: wifiButton
-                            label: "wifi"
-                            anchors.fill: parent
-                            onClicked: barRoot.popup(Theme.wifiApplication)
-                            onRightClicked: {
-                                if (Theme.barWifiRightClick === "toggle")
-                                    barRoot.controller.toggleWifi()
-                            }
-                        }
-
-                        Rectangle {
-                            anchors.right: parent.right
-                            anchors.bottom: parent.bottom
-                            anchors.bottomMargin: 2
-                            width: 7
-                            height: 7
-                            radius: width / 2
-                            color: Theme.accent
-                            visible: barRoot.controller.wifiStateKnown
-                                && barRoot.controller.wifiEnabled
-                            border.width: 1
-                            border.color: Theme.componentBackground
-                            z: 1
-                        }
-
-                        ConnectivityTooltip {
-                            anchorItem: wifiButton
-                            shown: wifiButton.hovered
-                            title: "Wi-Fi"
-                            icon: "wifi"
-                            status: !barRoot.controller.wifiStateKnown
-                                ? "Lecture…"
-                                : barRoot.controller.wifiEnabled ? "Activé" : "Désactivé"
-                            detail: !barRoot.controller.wifiStateKnown
-                                ? ""
-                                : !barRoot.controller.wifiEnabled
-                                    ? ""
-                                    : barRoot.controller.wifiNetworkName || "Non connecté"
+                    ConnectivityButton {
+                        icon: "wifi"
+                        title: "Wi-Fi"
+                        stateKnown: barRoot.controller.wifiStateKnown
+                        stateEnabled: barRoot.controller.wifiEnabled
+                        detail: barRoot.controller.wifiNetworkName
+                        emptyDetail: "Non connecté"
+                        onClicked: barRoot.popup(Theme.wifiApplication)
+                        onRightClicked: {
+                            if (Theme.barWifiRightClick === "toggle")
+                                barRoot.controller.toggleWifi()
                         }
                     }
 
-                    Item {
-                        width: bluetoothButton.width
-                        height: bluetoothButton.height
-
-                        BarButton {
-                            id: bluetoothButton
-                            label: "bluetooth"
-                            anchors.fill: parent
-                            onClicked: barRoot.popup(Theme.bluetoothApplication)
-                            onRightClicked: {
-                                if (Theme.barBluetoothRightClick === "toggle")
-                                    barRoot.controller.toggleBluetooth()
-                            }
-                        }
-
-                        Rectangle {
-                            anchors.right: parent.right
-                            anchors.bottom: parent.bottom
-                            anchors.bottomMargin: 2
-                            width: 7
-                            height: 7
-                            radius: width / 2
-                            color: Theme.accent
-                            visible: barRoot.controller.bluetoothStateKnown
-                                && barRoot.controller.bluetoothEnabled
-                            border.width: 1
-                            border.color: Theme.componentBackground
-                            z: 1
-                        }
-
-                        ConnectivityTooltip {
-                            anchorItem: bluetoothButton
-                            shown: bluetoothButton.hovered
-                            title: "Bluetooth"
-                            icon: "bluetooth"
-                            status: !barRoot.controller.bluetoothStateKnown
-                                ? "Lecture…"
-                                : barRoot.controller.bluetoothEnabled ? "Activé" : "Désactivé"
-                            detail: !barRoot.controller.bluetoothStateKnown
-                                ? ""
-                                : !barRoot.controller.bluetoothEnabled
-                                    ? ""
-                                    : barRoot.controller.bluetoothConnectedNames || "Aucun appareil"
+                    ConnectivityButton {
+                        icon: "bluetooth"
+                        title: "Bluetooth"
+                        stateKnown: barRoot.controller.bluetoothStateKnown
+                        stateEnabled: barRoot.controller.bluetoothEnabled
+                        detail: barRoot.controller.bluetoothConnectedNames
+                        emptyDetail: "Aucun appareil"
+                        onClicked: barRoot.popup(Theme.bluetoothApplication)
+                        onRightClicked: {
+                            if (Theme.barBluetoothRightClick === "toggle")
+                                barRoot.controller.toggleBluetooth()
                         }
                     }
 
