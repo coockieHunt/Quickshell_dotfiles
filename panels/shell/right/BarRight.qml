@@ -68,9 +68,8 @@ BarBlock {
 
         BarSeparator {}
 
-        Item {
-            width: Theme.spacing
-            height: 1
+        PerformanceIndicator {
+            source: root.hostBar.performanceSource
         }
 
         BarButton {

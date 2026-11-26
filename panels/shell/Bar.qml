@@ -7,6 +7,7 @@ import "../../panels/services"
 import "../../panels/notifications"
 import "../apps"
 import "../controls"
+import "../controls/ControlCenter/services"
 import "left"
 import "center"
 import "right"
@@ -18,7 +19,7 @@ Scope {
     required property var wallpaperPicker
     required property var controller
     required property var notificationController
-    property var performanceSource: null
+    property var performanceSource: performance
     property bool superHeld: false
     signal hideRequested()
 
@@ -42,6 +43,10 @@ Scope {
 
     WeatherService {
         id: weather
+    }
+
+    PerformanceService {
+        id: performance
     }
 
     Variants {
