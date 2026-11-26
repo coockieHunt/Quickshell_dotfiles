@@ -2,10 +2,13 @@ import Quickshell
 import Quickshell.Io
 import "panels/apps"
 import "panels/controls"
+import "panels/controls/ControlCenter"
+//import "panels/controls/Bar"
 import "panels/desktop"
 import "panels/notifications"
 import "panels/services"
 import "panels/shell"
+
 
 Scope {
     id: root

@@ -1,50 +1,20 @@
 import QtQuick
-import Quickshell.Io
-import "../../components"
-import "../../components/info"
-import "../../theme"
+import "../../../components"
+import "../../../components/info"
+import "../../../theme"
 
 Item {
     id: root
 
     required property var controller
+    readonly property var perf: controller.performanceControl
 
     property string processSort: "cpu"
 
-    property real gpuUsage: 0
-    property bool hasGpuSample: false
-
-    Process {
-        id: gpuProc
-        command: ["sh", "-c", "cat /sys/class/drm/card*/device/gpu_busy_percent 2>/dev/null"]
-
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const values = text.trim().split("\n")
-                    .map(s => parseInt(s))
-                    .filter(n => Number.isFinite(n))
-                root.hasGpuSample = values.length > 0
-                root.gpuUsage = values.length > 0 ? Math.max.apply(null, values) : 0
-            }
-        }
-    }
-
-    Timer {
-        interval: Theme.performanceStatsRefreshSeconds * 1000
-        running: root.controller.panelMode !== "notifications"
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: {
-            if (!gpuProc.running)
-                gpuProc.running = true
-        }
-    }
-
     readonly property var sortedProcesses: {
-        const pc = controller.performanceControl
-        if (!pc || !pc.topProcesses)
+        if (!perf || !perf.topProcesses)
             return []
-        const list = Array.prototype.slice.call(pc.topProcesses)
+        const list = Array.prototype.slice.call(perf.topProcesses)
         const key = processSort
         list.sort((a, b) => b[key] - a[key])
         return list
@@ -63,10 +33,6 @@ Item {
             left: parent.left
             bottom: parent.bottom
             margins: 4
-        }
-
-        MouseArea {
-            anchors.fill: parent
         }
 
         Column {
@@ -92,38 +58,33 @@ Item {
                 }
             }
 
-            Column {
+            Row {
                 width: parent.width
-                spacing: Theme.spacing / 2
+                height: 170
+                spacing: 4
 
-                Row {
-                    width: parent.width
-                    height: 170
-                    spacing: 4
+                VerticalMeter {
+                    width: (parent.width - parent.spacing * 2) / 3
+                    height: parent.height
+                    label: "GPU"
+                    value: perf ? perf.gpuUsage : 0
+                    available: perf ? perf.hasGpuSample : false
+                }
 
-                    VerticalMeter {
-                        width: (parent.width - parent.spacing * 2) / 3
-                        height: parent.height
-                        label: "GPU"
-                        value: root.gpuUsage
-                        available: root.hasGpuSample
-                    }
+                VerticalMeter {
+                    width: (parent.width - parent.spacing * 2) / 3
+                    height: parent.height
+                    label: "CPU"
+                    value: perf ? perf.cpuUsage : 0
+                    available: perf ? perf.hasCpuSample : false
+                }
 
-                    VerticalMeter {
-                        width: (parent.width - parent.spacing * 2) / 3
-                        height: parent.height
-                        label: "CPU"
-                        value: controller.performanceControl && controller.performanceControl.hasCpuSample ? controller.performanceControl.cpuUsage : 0
-                        available: !!(controller.performanceControl && controller.performanceControl.hasCpuSample)
-                    }
-
-                    VerticalMeter {
-                        width: (parent.width - parent.spacing * 2) / 3
-                        height: parent.height
-                        label: "RAM"
-                        value: controller.performanceControl && controller.performanceControl.memoryTotal > 0 ? controller.performanceControl.memoryUsed / controller.performanceControl.memoryTotal * 100 : 0
-                        available: !!(controller.performanceControl && controller.performanceControl.memoryTotal > 0)
-                    }
+                VerticalMeter {
+                    width: (parent.width - parent.spacing * 2) / 3
+                    height: parent.height
+                    label: "RAM"
+                    value: perf && perf.memoryTotal > 0 ? perf.memoryUsed / perf.memoryTotal * 100 : 0
+                    available: perf ? perf.memoryTotal > 0 : false
                 }
             }
 
@@ -135,27 +96,27 @@ Item {
                     model: [{
                         "icon": "speed",
                         "label": "Charge moyenne (1/5/15 min)",
-                        "value": controller.performanceControl ? `${controller.performanceControl.loadAverage1.toFixed(2)} / ${controller.performanceControl.loadAverage5.toFixed(2)} / ${controller.performanceControl.loadAverage15.toFixed(2)}` : "Lecture…"
+                        "value": perf ? `${perf.loadAverage1.toFixed(2)} / ${perf.loadAverage5.toFixed(2)} / ${perf.loadAverage15.toFixed(2)}` : "Lecture…"
                     }, {
                         "icon": "swap_horiz",
                         "label": "Swap",
-                        "value": controller.performanceControl && controller.performanceControl.swapTotal > 0 ? `${controller.performanceControl.formatMemory(controller.performanceControl.swapUsed)} / ${controller.performanceControl.formatMemory(controller.performanceControl.swapTotal)}` : "Aucune swap"
+                        "value": perf && perf.swapTotal > 0 ? `${perf.formatMemory(perf.swapUsed)} / ${perf.formatMemory(perf.swapTotal)}` : "Aucune swap"
                     }, {
                         "icon": "schedule",
                         "label": "Depuis le démarrage",
-                        "value": controller.performanceControl ? controller.performanceControl.formatUptime(controller.performanceControl.uptimeSeconds) : "Lecture…"
+                        "value": perf ? perf.formatUptime(perf.uptimeSeconds) : "Lecture…"
                     }, {
                         "icon": "device_thermostat",
                         "label": "Température",
-                        "value": controller.performanceControl && controller.performanceControl.temperatureKnown ? `${Math.round(controller.performanceControl.temperatureCelsius)} °C` : "Indisponible"
+                        "value": perf && perf.temperatureKnown ? `${Math.round(perf.temperatureCelsius)} °C` : "Indisponible"
                     }, {
                         "icon": "download",
                         "label": "Réseau reçu",
-                        "value": controller.performanceControl ? controller.performanceControl.formatRate(controller.performanceControl.networkReceiveRate) : "Lecture…"
+                        "value": perf ? perf.formatRate(perf.networkReceiveRate) : "Lecture…"
                     }, {
                         "icon": "upload",
                         "label": "Réseau envoyé",
-                        "value": controller.performanceControl ? controller.performanceControl.formatRate(controller.performanceControl.networkTransmitRate) : "Lecture…"
+                        "value": perf ? perf.formatRate(perf.networkTransmitRate) : "Lecture…"
                     }]
 
                     delegate: Rectangle {
@@ -166,8 +127,8 @@ Item {
                         height: 28
                         radius: Theme.cornerRadius
                         color: index % 2 === 0
-                            ? Theme.componentSurface
-                            : Qt.rgba(Theme.componentSurface.r, Theme.componentSurface.g, Theme.componentSurface.b, 0.55)
+                            ? Theme.componentBackground
+                            : Qt.rgba(Theme.componentBackground.r, Theme.componentBackground.g, Theme.componentBackground.b, 0.55)
 
                         Row {
                             anchors.fill: parent
@@ -199,7 +160,6 @@ Item {
 
                             Text {
                                 id: valueText
-
                                 height: parent.height
                                 text: modelData.value
                                 color: Theme.text
@@ -297,8 +257,8 @@ Item {
                         height: 28
                         radius: Theme.cornerRadius
                         color: index % 2 === 0
-                            ? Theme.componentSurface
-                            : Qt.rgba(Theme.componentSurface.r, Theme.componentSurface.g, Theme.componentSurface.b, 0.55)
+                            ? Theme.componentBackground
+                            : Qt.rgba(Theme.componentBackground.r, Theme.componentBackground.g, Theme.componentBackground.b, 0.55)
 
                         Row {
                             anchors.fill: parent
@@ -320,7 +280,7 @@ Item {
                             Text {
                                 id: processStats
                                 height: parent.height
-                                text: `${modelData.cpu.toFixed(2)} cœur${Math.round(modelData.cpu * 100) === 100 ? "" : "s"} · ${controller.performanceControl.formatMemory(modelData.memory)}`
+                                text: `${modelData.cpu.toFixed(2)} cœur${Math.round(modelData.cpu * 100) === 100 ? "" : "s"} · ${root.perf ? root.perf.formatMemory(modelData.memory) : ""}`
                                 color: Theme.accent
                                 font.family: Theme.fontFamily
                                 font.pixelSize: Theme.fontSize - 3
@@ -332,8 +292,7 @@ Item {
                 }
 
                 Text {
-                    visible: !controller.performanceControl
-                        || controller.performanceControl.topProcesses.length === 0
+                    visible: !root.perf || root.perf.topProcesses.length === 0
                     text: "Lecture des processus…"
                     color: Theme.text
                     opacity: 0.65
@@ -341,9 +300,6 @@ Item {
                     font.pixelSize: Theme.fontSize - 2
                 }
             }
-
         }
-
     }
-
 }

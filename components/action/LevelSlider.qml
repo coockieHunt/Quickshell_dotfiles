@@ -10,7 +10,11 @@ Row {
     property real maximumValue: 1
     property string unavailableText: "—"
 
+    property bool iconClickable: false
+    property bool iconDimmed: false
+
     signal dragged(real value)
+    signal iconClicked()
 
     height: 28
     spacing: 2
@@ -23,14 +27,35 @@ Row {
         text: "-"
     }
 
-    Text {
+    Item {
+        id: iconArea
         width: 22
         height: parent.height
-        text: root.icon
-        color: Theme.text
-        font.family: Theme.iconFont
-        font.pixelSize: Theme.iconSize
-        verticalAlignment: Text.AlignVCenter
+
+        Text {
+            id: iconText
+            anchors.fill: parent
+            text: root.icon
+            color: Theme.text
+            opacity: root.iconDimmed ? 0.45 : (iconMouse.containsMouse && root.iconClickable ? 0.7 : 1.0)
+            font.family: Theme.iconFont
+            font.pixelSize: Theme.iconSize
+            verticalAlignment: Text.AlignVCenter
+            horizontalAlignment: Text.AlignHCenter
+
+            Behavior on opacity {
+                NumberAnimation { duration: 120 }
+            }
+        }
+
+        MouseArea {
+            id: iconMouse
+            anchors.fill: parent
+            enabled: root.iconClickable
+            hoverEnabled: root.iconClickable
+            cursorShape: root.iconClickable ? Qt.PointingHandCursor : Qt.ArrowCursor
+            onClicked: root.iconClicked()
+        }
     }
 
     Slider {
@@ -72,23 +97,21 @@ Row {
                     width: slider.availableWidth
                     height: parent.height
                     text: "#".repeat(Math.ceil(slider.availableWidth / barMetrics.advanceWidth))
-                    color: slider.enabled ? Theme.accent : Theme.surface
+                    color: Theme.accent
+                    opacity: root.iconDimmed ? 0.45 : 1.0
                     font.family: Theme.monoFont
                     font.pixelSize: 12
                     font.bold: true
                     horizontalAlignment: Text.AlignLeft
                     verticalAlignment: Text.AlignVCenter
                 }
-
             }
-
         }
 
         handle: Item {
             implicitWidth: 1
             implicitHeight: 1
         }
-
     }
 
     Text {
@@ -103,5 +126,4 @@ Row {
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignRight
     }
-
 }

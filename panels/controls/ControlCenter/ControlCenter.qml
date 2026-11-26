@@ -1,10 +1,10 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import "../../components"
-import "../../components/action"
-import "../../theme"
-import "../shell"
+import "../../../components"
+import "../../../components/action"
+import "../../../theme"
+import "../../shell"
 
 Item {
     id: root
@@ -166,7 +166,7 @@ Item {
                 width: parent.width
                 icon: "volume_up"
                 value: controller.audio ? controller.audio.volume : 0
-                maximumValue: 1.5
+                maximumValue: 1
                 enabled: controller.audio !== null
                 unavailableText: "0%"
                 onDragged: (value) => {

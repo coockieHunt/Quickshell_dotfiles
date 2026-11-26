@@ -691,13 +691,7 @@ Scope {
                         }
                     }
 
-                    SystemUsage {
-                        id: systemUsage
-                        onHasCpuSampleChanged: {
-                            if (systemUsage.hasCpuSample)
-                                barRoot.performanceSource = systemUsage
-                        }
-                    }
+                  
 
                     Item {
                         width: Theme.spacing
