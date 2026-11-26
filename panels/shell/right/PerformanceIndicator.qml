@@ -12,7 +12,7 @@ Row {
     readonly property int cpuPercent: Math.round(source.cpuUsage)
 
     height: Theme.buttonSize
-    spacing: Theme.spacing
+    spacing: 0
 
     TextMetrics {
         id: widest
