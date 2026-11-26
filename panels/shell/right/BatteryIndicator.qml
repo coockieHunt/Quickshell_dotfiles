@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell.Services.UPower
 import "../../../components/tooltip"
 import "../../../theme"
 import "services"
@@ -8,6 +9,18 @@ Row {
 
     required property var device
     required property string tlpChargeMode
+
+    readonly property real percent: device.percentage <= 1
+        ? device.percentage * 100 : device.percentage
+    readonly property bool charging: device.state === UPowerDeviceState.Charging
+        || device.state === UPowerDeviceState.FullyCharged
+
+    readonly property color levelColor: {
+        if (charging)     return "#4CAF50"  
+        if (percent < 20) return "#F44336"   
+        if (percent < 50) return "#FF9800"  
+        return Theme.text                    
+    }
 
     visible: device.isLaptopBattery
     height: Theme.buttonSize
@@ -32,10 +45,14 @@ Row {
     Text {
         visible: battery.chargeIconVisible
         text: battery.chargeIcon
-        color: Theme.accent
+        color: root.levelColor
         font.family: Theme.iconFont
         font.pixelSize: Theme.iconSize
         y: (parent.height - implicitHeight) / 2
+
+        Behavior on color {
+            ColorAnimation { duration: 200 }
+        }
     }
 
     Text {
@@ -45,6 +62,7 @@ Row {
         font.pixelSize: Theme.fontSize
         y: (parent.height - implicitHeight) / 2
     }
+
 
     HoverHandler {
         id: hover

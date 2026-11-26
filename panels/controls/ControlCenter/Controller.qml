@@ -33,6 +33,7 @@ Scope {
     readonly property bool wifiEnabled: network.wifiEnabled
     readonly property bool bluetoothEnabled: network.bluetoothEnabled
     readonly property string wifiNetworkName: network.wifiNetworkName
+    readonly property int wifiSignal: network.wifiSignal
     readonly property string bluetoothConnectedNames: network.bluetoothConnectedNames
     readonly property bool wifiStateKnown: network.wifiStateKnown
     readonly property bool bluetoothStateKnown: network.bluetoothStateKnown
@@ -56,7 +57,6 @@ Scope {
 
     function toggleMic() { audioService.toggleMic() }
     function setMicVolume(value) { audioService.setMicVolume(value) }
-
 
     function togglePanel() {
         panelOpen = !panelOpen

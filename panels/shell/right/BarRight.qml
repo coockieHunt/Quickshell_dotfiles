@@ -25,7 +25,15 @@ BarBlock {
         spacing: Theme.spacing / 2
 
         ConnectivityButton {
-            icon: "wifi"
+            icon: {
+                const c = root.hostBar.controller
+                if (!c.wifiEnabled) return "wifi_off"
+                if (c.wifiNetworkName === "") return "wifi"
+                if (c.wifiSignal >= 75) return "signal_wifi_4_bar"
+                if (c.wifiSignal >= 50) return "network_wifi_3_bar"
+                if (c.wifiSignal >= 25) return "network_wifi_2_bar"
+                return "network_wifi_1_bar"
+            }
             title: "Wi-Fi"
             stateKnown: root.hostBar.controller.wifiStateKnown
             stateEnabled: root.hostBar.controller.wifiEnabled
@@ -71,6 +79,8 @@ BarBlock {
         PerformanceIndicator {
             source: root.hostBar.performanceSource
         }
+
+        BarSeparator {}
 
         BarButton {
             id: trayButton

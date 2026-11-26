@@ -8,6 +8,7 @@ Item {
     property bool bluetoothEnabled: false
     property string wifiNetworkName: ""
     property string bluetoothConnectedNames: ""
+    property int wifiSignal: 0
     property bool wifiStateKnown: false
     property bool bluetoothStateKnown: false
     readonly property bool airplaneEnabled: wifiStateKnown && bluetoothStateKnown
@@ -60,11 +61,18 @@ Item {
 
     Process {
         id: wifiConnectionStatus
-        command: ["nmcli", "-t", "-f", "IN-USE,SSID", "dev", "wifi"]
+        command: ["nmcli", "-t", "-f", "IN-USE,SSID,SIGNAL", "dev", "wifi"]
         stdout: StdioCollector {
             onStreamFinished: {
                 const active = text.split("\n").find(line => line.startsWith("*:"))
-                root.wifiNetworkName = active ? active.substring(2).trim() : ""
+                if (active) {
+                    const parts = active.split(":")
+                    root.wifiNetworkName = parts[1].trim()
+                    root.wifiSignal = parseInt(parts[parts.length - 1]) || 0
+                } else {
+                    root.wifiNetworkName = ""
+                    root.wifiSignal = 0
+                }
             }
         }
         stderr: SplitParser { onRead: line => console.warn("Wi-Fi connection status:", line) }
