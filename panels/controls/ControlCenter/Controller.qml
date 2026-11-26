@@ -50,6 +50,14 @@ Scope {
     readonly property string tlpChargeMode: power.tlpChargeMode
     readonly property bool tlpChargeCommandRunning: power.tlpChargeCommandRunning
 
+    readonly property bool micMuted: audioService.micMuted
+    readonly property bool micStateKnown: audioService.micStateKnown
+    readonly property var mic: audioService.mic
+
+    function toggleMic() { audioService.toggleMic() }
+    function setMicVolume(value) { audioService.setMicVolume(value) }
+
+
     function togglePanel() {
         panelOpen = !panelOpen
         console.info("Control panel", panelOpen ? "opened" : "closed")

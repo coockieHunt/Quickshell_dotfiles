@@ -192,6 +192,21 @@ Item {
                 onDragged: (value) => controller.setBrightness(value)
             }
 
+            LevelSlider {
+                width: parent.width
+                icon: controller.micMuted ? "mic_off" : "mic"
+                iconClickable: controller.micStateKnown
+                iconDimmed: controller.micMuted
+                value: controller.mic ? controller.mic.volume : 0
+                maximumValue: 1
+                enabled: controller.mic !== null
+                unavailableText: "0%"
+                onIconClicked: controller.toggleMic()
+                onDragged: (value) => {
+                    if (controller.mic)
+                        controller.mic.volume = value
+                }
+            }
 
         }
     }

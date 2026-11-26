@@ -15,6 +15,8 @@ Item {
     readonly property var mic: Pipewire.defaultAudioSource
         ? Pipewire.defaultAudioSource.audio : null
 
+    readonly property real micVolume: mic ? mic.volume : 0
+
     function refresh() {
         if (!soundStatus.running) soundStatus.running = true
         if (!micStatus.running) micStatus.running = true
@@ -26,6 +28,11 @@ Item {
 
     function toggleMic() {
         if (!micCommand.running) micCommand.running = true
+    }
+
+    function setMicVolume(value) {
+        if (!mic) return
+        mic.volume = Math.max(0, Math.min(1, value))
     }
 
     PwObjectTracker { objects: [Pipewire.defaultAudioSink, Pipewire.defaultAudioSource] }
