@@ -7,6 +7,7 @@ Item {
 
     property bool soundMuted: false
     property bool soundStateKnown: false
+    property int soundVolume: 0
     readonly property var audio: Pipewire.defaultAudioSink
         ? Pipewire.defaultAudioSink.audio : null
 
@@ -26,6 +27,15 @@ Item {
         if (!soundCommand.running) soundCommand.running = true
     }
 
+    function changeSoundVolume(deltaPercent) {
+        if (soundVolumeCommand.running) return
+        const sign = deltaPercent >= 0 ? "+" : "-"
+        const amount = Math.abs(deltaPercent)
+        soundVolumeCommand.command = ["wpctl", "set-volume", "-l", "1.0",
+            "@DEFAULT_AUDIO_SINK@", amount + "%" + sign]
+        soundVolumeCommand.running = true
+    }
+
     function toggleMic() {
         if (!micCommand.running) micCommand.running = true
     }
@@ -43,6 +53,8 @@ Item {
         stdout: StdioCollector {
             onStreamFinished: {
                 root.soundMuted = text.includes("[MUTED]")
+                const match = text.match(/Volume:\s*([\d.]+)/)
+                root.soundVolume = match ? Math.round(parseFloat(match[1]) * 100) : 0
                 root.soundStateKnown = text.trim().length > 0
             }
         }
@@ -54,6 +66,12 @@ Item {
         command: ["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"]
         onExited: root.refresh()
         stderr: SplitParser { onRead: line => console.warn("Sound toggle:", line) }
+    }
+
+    Process {
+        id: soundVolumeCommand
+        onExited: root.refresh()
+        stderr: SplitParser { onRead: line => console.warn("Sound volume:", line) }
     }
 
     Process {

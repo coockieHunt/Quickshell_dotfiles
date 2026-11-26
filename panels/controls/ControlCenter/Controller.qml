@@ -39,8 +39,10 @@ Scope {
     readonly property bool bluetoothStateKnown: network.bluetoothStateKnown
     readonly property bool airplaneEnabled: network.airplaneEnabled
 
+    readonly property var audioService: audioService
     readonly property bool soundMuted: audioService.soundMuted
     readonly property bool soundStateKnown: audioService.soundStateKnown
+    readonly property int soundVolume: audioService.soundVolume
     readonly property var audio: audioService.audio
 
     readonly property real brightness: brightnessService.brightness
@@ -57,6 +59,7 @@ Scope {
 
     function toggleMic() { audioService.toggleMic() }
     function setMicVolume(value) { audioService.setMicVolume(value) }
+    function changeSoundVolume(deltaPercent) { audioService.changeSoundVolume(deltaPercent) }
 
     function togglePanel() {
         panelOpen = !panelOpen
@@ -122,7 +125,10 @@ Scope {
         onTriggered: root.refreshQuickSettings()
     }
 
-    Component.onCompleted: refreshNetworkStatus()
+    Component.onCompleted: {
+        refreshNetworkStatus()
+        audioService.refresh()
+    }
 
     PanelWindow {
         visible: root.panelOpen

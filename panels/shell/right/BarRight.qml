@@ -60,7 +60,22 @@ BarBlock {
             }
         }
 
-        BarButton { label: "volume_up"; onClicked: root.hostBar.popup("pavucontrol") }
+        BarButton {
+            id: soundButton
+            label: {
+                const c = root.hostBar.controller
+                if (!c.soundStateKnown) return "volume_up"
+                if (c.soundMuted) return "volume_off"
+                if (c.soundVolume === 0) return "volume_mute"
+                if (c.soundVolume < 50) return "volume_down"
+                return "volume_up"
+            }
+            tooltip: "Clic souris : +/- 10%\nClic molette : muet"
+
+            onClicked: root.hostBar.controller.changeSoundVolume(-10)
+            onRightClicked: root.hostBar.controller.changeSoundVolume(10)
+            onMiddleClicked: root.hostBar.controller.toggleSound()
+        }
 
         BarSeparator {}
 
