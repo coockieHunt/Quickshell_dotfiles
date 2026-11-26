@@ -17,6 +17,8 @@ PopupWindow {
     property string appLabel: ""
     property var appNames: []
 
+    readonly property int maxListHeight: 400
+
     signal closeRequested()
 
     function askClose(item) {
@@ -64,7 +66,9 @@ PopupWindow {
     visible: open && barVisible
     grabFocus: true
     implicitWidth: confirming ? 340 : 220
-    implicitHeight: confirming ? 220 : Math.max(48, trayContent.implicitHeight + 16)
+    implicitHeight: confirming
+        ? 220
+        : Math.min(maxListHeight, Math.max(48, trayContent.implicitHeight + 16))
     color: "transparent"
     onVisibleChanged: {
         if (!visible) {
@@ -84,106 +88,146 @@ PopupWindow {
         border.width: 1
         border.color: Theme.componentBorder
 
-        Column {
-            id: trayContent
+        Flickable {
+            id: flick
             anchors.fill: parent
             anchors.margins: 8
-            spacing: 2
+            contentWidth: width
+            contentHeight: trayContent.implicitHeight
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
+            interactive: contentHeight > height
 
-            Repeater {
-                model: SystemTray.items
+            Column {
+                id: trayContent
+                width: flick.width
+                spacing: 0
 
-                delegate: Rectangle {
-                    required property var modelData
-                    width: trayContent.width
-                    height: 34
-                    radius: Theme.cornerRadius
-                    color: trayItemMouse.containsMouse ? Theme.buttonHover : "transparent"
+                Repeater {
+                    model: SystemTray.items
 
-                    Row {
-                        anchors.fill: parent
-                        anchors.leftMargin: 8
-                        anchors.rightMargin: 36
-                        spacing: 8
+                    delegate: Rectangle {
+                        id: row
+                        required property var modelData
+                        required property int index
 
-                        IconImage {
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 20
-                            height: 20
-                            source: modelData.icon
-                        }
-
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: parent.width - 28
-                            text: modelData.tooltipTitle || modelData.title || modelData.id
-                            color: Theme.text
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSize
-                            elide: Text.ElideRight
-                        }
-                    }
-
-                    MouseArea {
-                        id: trayItemMouse
-                        anchors.fill: parent
-                        acceptedButtons: Qt.LeftButton | Qt.RightButton
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: mouse => {
-                            if (modelData.onlyMenu
-                                    || (mouse.button === Qt.RightButton && modelData.hasMenu)) {
-                                modelData.display(popup, Math.round(mouse.x), Math.round(mouse.y))
-                            } else if (mouse.button === Qt.LeftButton) {
-                                modelData.activate()
-                                popup.closeRequested()
-                            }
-                        }
-                    }
-
-                    Rectangle {
-                        id: closeButton
-                        anchors.right: parent.right
-                        anchors.rightMargin: 6
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: 24
-                        height: 24
+                        width: trayContent.width
+                        height: 34
                         radius: Theme.cornerRadius
-                        z: 10
-                        color: closeMouse.containsMouse
-                            ? Qt.rgba(Theme.danger.r, Theme.danger.g, Theme.danger.b, 0.28)
-                            : "transparent"
+                        color: rowHover.hovered ? Theme.buttonHover : "transparent"
 
-                        Text {
-                            anchors.centerIn: parent
-                            text: "close"
-                            color: Theme.danger
-                            font.family: "Material Symbols Rounded"
-                            font.pixelSize: Theme.iconSize - 2
+                        HoverHandler {
+                            id: rowHover
+                        }
+
+                        Row {
+                            anchors.fill: parent
+                            anchors.leftMargin: 8
+                            anchors.rightMargin: 36
+                            spacing: 8
+
+                            IconImage {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 20
+                                height: 20
+                                source: row.modelData.icon
+                                    || "image://icon/application-x-executable"
+                            }
+
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: parent.width - 28
+                                text: row.modelData.tooltipTitle
+                                    || row.modelData.title
+                                    || row.modelData.id
+                                color: Theme.text
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSize
+                                elide: Text.ElideRight
+                            }
                         }
 
                         MouseArea {
-                            id: closeMouse
                             anchors.fill: parent
-                            hoverEnabled: true
+                            acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: popup.askClose(modelData)
+                            onClicked: mouse => {
+                                if (mouse.button === Qt.MiddleButton) {
+                                    row.modelData.secondaryActivate()
+                                    popup.closeRequested()
+                                } else if (row.modelData.onlyMenu
+                                        || (mouse.button === Qt.RightButton && row.modelData.hasMenu)) {
+                                    row.modelData.display(popup, Math.round(mouse.x), Math.round(mouse.y))
+                                } else if (mouse.button === Qt.LeftButton) {
+                                    row.modelData.activate()
+                                    popup.closeRequested()
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            visible: row.index < SystemTray.items.values.length - 1
+                            anchors.bottom: parent.bottom
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.leftMargin: 8
+                            anchors.rightMargin: 8
+                            height: 1
+                            color: Theme.componentBorder
+                            opacity: 0.5
+                        }
+
+                        Rectangle {
+                            id: closeButton
+                            anchors.right: parent.right
+                            anchors.rightMargin: 6
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 24
+                            height: 24
+                            radius: Theme.cornerRadius
+                            z: 10
+
+                            opacity: rowHover.hovered ? 1 : 0
+                            enabled: opacity > 0
+                            Behavior on opacity {
+                                NumberAnimation { duration: 120 }
+                            }
+
+                            color: closeMouse.containsMouse
+                                ? Qt.rgba(Theme.danger.r, Theme.danger.g, Theme.danger.b, 0.28)
+                                : "transparent"
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "close"
+                                color: Theme.danger
+                                font.family: Theme.iconFont
+                                font.pixelSize: Theme.iconSize - 2
+                            }
+
+                            MouseArea {
+                                id: closeMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: popup.askClose(row.modelData)
+                            }
                         }
                     }
                 }
-            }
 
-            Text {
-                visible: SystemTray.items.values.length === 0
-                width: trayContent.width
-                height: 32
-                text: "Aucune icône disponible"
-                color: Theme.text
-                opacity: 0.7
-                font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontSize
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
+                Text {
+                    visible: SystemTray.items.values.length === 0
+                    width: trayContent.width
+                    height: 32
+                    text: "Aucune icône disponible"
+                    color: Theme.text
+                    opacity: 0.7
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
             }
         }
     }
