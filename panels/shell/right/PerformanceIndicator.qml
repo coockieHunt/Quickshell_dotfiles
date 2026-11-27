@@ -1,3 +1,5 @@
+
+
 import QtQuick
 import "../../../theme"
 
@@ -12,7 +14,7 @@ Row {
     readonly property int cpuPercent: Math.round(source.cpuUsage)
 
     height: Theme.buttonSize
-    spacing: 0
+    spacing: Theme.spacing / 3
 
     TextMetrics {
         id: widest
@@ -21,51 +23,39 @@ Row {
         text: "100%"
     }
 
-    Row {
-        height: Theme.buttonSize
-        spacing: Theme.spacing / 2
-
-        Text {
-            anchors.baseline: value.baseline
-            text: "RAM"
-            color: Theme.accent
-            font.family: Theme.fontFamily
-            font.pixelSize: Theme.fontSize - 2
-            font.weight: Font.DemiBold
-        }
-
-        Text {
-            id: value
-            anchors.verticalCenter: parent.verticalCenter
-            width: widest.width
-            text: `${root.ramPercent}%`
-            color: Theme.text
-            font.family: Theme.fontFamily
-            font.pixelSize: Theme.fontSize
-        }
+    Text {
+        anchors.verticalCenter: parent.verticalCenter
+        text: "RAM"
+        color: Theme.accent
+        font.family: Theme.fontFamily
+        font.pixelSize: Theme.fontSize - 2
+        font.weight: Font.DemiBold
     }
 
-    Row {
-        height: Theme.buttonSize
-        spacing: Theme.spacing / 2
+    Text {
+        anchors.verticalCenter: parent.verticalCenter
+        text: `${root.ramPercent}%`
+        color: Theme.text
+        font.family: Theme.fontFamily
+        font.pixelSize: Theme.fontSize
+    }
 
-        Text {
-            anchors.baseline: cpuValue.baseline
-            text: "CPU"
-            color: Theme.accent
-            font.family: Theme.fontFamily
-            font.pixelSize: Theme.fontSize - 2
-            font.weight: Font.DemiBold
-        }
+    Item { width: Theme.spacing; height: 1 }
 
-        Text {
-            id: cpuValue
-            anchors.verticalCenter: parent.verticalCenter
-            width: widest.width
-            text: `${root.cpuPercent}%`
-            color: Theme.text
-            font.family: Theme.fontFamily
-            font.pixelSize: Theme.fontSize
-        }
+    Text {
+        anchors.verticalCenter: parent.verticalCenter
+        text: "CPU"
+        color: Theme.accent
+        font.family: Theme.fontFamily
+        font.pixelSize: Theme.fontSize - 2
+        font.weight: Font.DemiBold
+    }
+
+    Text {
+        anchors.verticalCenter: parent.verticalCenter
+        text: `${root.cpuPercent}%`
+        color: Theme.text
+        font.family: Theme.fontFamily
+        font.pixelSize: Theme.fontSize
     }
 }
