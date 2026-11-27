@@ -99,7 +99,8 @@ BarBlock {
 
         BarButton {
             id: trayButton
-            label: root.trayOpen ? "expand_less" : "expand_more"
+            label: root.trayOpen ? "close" : "more_horiz"
+            tooltip: root.trayOpen ? "Masquer les icônes" : "Afficher les icônes cachées"
             highlighted: root.trayOpen
             onClicked: root.trayClicked()
         }
