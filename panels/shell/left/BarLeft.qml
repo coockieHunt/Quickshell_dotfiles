@@ -3,6 +3,7 @@ import Quickshell
 import "../../../components"
 import "../../../components/action"
 import "../../../theme"
+import "../../../components/info"
 import "services"
 
 BarBlock {
@@ -39,9 +40,11 @@ BarBlock {
             iconSize: Theme.iconSize - 2
             onClicked: root.hostBar.launcherControl.toggle()
         }
+        
         BarButton {
+            id: wallpaperButton
             label: "wallpaper"
-            tooltip: "Clic gauche : ouvrir le sélecteur\nClic droit : fond aléatoire\nClic molette : supprimer l’actuel"
+
             onClicked: root.hostBar.wallpaperPicker.toggle()
             onRightClicked: Quickshell.execDetached([
                 Theme.wallpaperScript, "--directory", Theme.wallpaperDir, "random"
@@ -50,6 +53,17 @@ BarBlock {
                 Theme.wallpaperScript, "--directory", Theme.wallpaperDir, "delete-current"
             ])
         }
+
+        MouseTooltip {
+            anchorItem: wallpaperButton
+            shown: wallpaperButton.hovered
+            rows: [
+                { label: "Clic gauche", value: "Ouvrir le sélecteur", button: "left" },
+                { label: "Clic droit", value: "Fond aléatoire", button: "right" },
+                { label: "Clic molette", value: "Supprimer le fond actuel", button: "middle" }
+            ]
+        }
+
         BarButton {
             label: "top_panel_close"
             onClicked: root.hostBar.hideRequested()

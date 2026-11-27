@@ -24,27 +24,32 @@ BarBlock {
         anchors.centerIn: parent
         spacing: Theme.spacing / 2
 
-        ConnectivityButton {
-            icon: {
-                const c = root.hostBar.controller
-                if (!c.wifiEnabled) return "wifi_off"
-                if (c.wifiNetworkName === "") return "wifi"
-                if (c.wifiSignal >= 75) return "signal_wifi_4_bar"
-                if (c.wifiSignal >= 50) return "network_wifi_3_bar"
-                if (c.wifiSignal >= 25) return "network_wifi_2_bar"
-                return "network_wifi_1_bar"
-            }
-            title: "Wi-Fi"
-            stateKnown: root.hostBar.controller.wifiStateKnown
-            stateEnabled: root.hostBar.controller.wifiEnabled
-            detail: root.hostBar.controller.wifiNetworkName
-            emptyDetail: "Non connecté"
-            onClicked: root.hostBar.popup(Theme.wifiApplication)
-            onRightClicked: {
-                if (Theme.barWifiRightClick === "toggle")
-                    root.hostBar.controller.toggleWifi()
-            }
+    ConnectivityButton {
+        icon: {
+            const c = root.hostBar.controller
+            if (!c.wifiEnabled) return "wifi_off"
+            if (c.wifiNetworkName === "") return "wifi"
+            if (c.wifiSignal >= 75) return "signal_wifi_4_bar"
+            if (c.wifiSignal >= 50) return "network_wifi_3_bar"
+            if (c.wifiSignal >= 25) return "network_wifi_2_bar"
+            return "network_wifi_1_bar"
         }
+        title: "Wi-Fi"
+        stateKnown: root.hostBar.controller.wifiStateKnown
+        stateEnabled: root.hostBar.controller.wifiEnabled
+        detail: {
+            const c = root.hostBar.controller
+            if (c.wifiNetworkName === "") return ""
+            return c.wifiNetworkName + " · " + c.wifiSignal + " %"
+        }
+        emptyDetail: "Non connecté"
+        onClicked: root.hostBar.popup(Theme.wifiApplication)
+        onRightClicked: {
+            if (Theme.barWifiRightClick === "toggle")
+                root.hostBar.controller.toggleWifi()
+        }
+    }
+
 
         ConnectivityButton {
             icon: "bluetooth"
@@ -70,11 +75,20 @@ BarBlock {
                 if (c.soundVolume < 50) return "volume_down"
                 return "volume_up"
             }
-            tooltip: "Clic souris : +/- 10%\nClic molette : muet"
 
             onClicked: root.hostBar.controller.changeSoundVolume(-10)
             onRightClicked: root.hostBar.controller.changeSoundVolume(10)
             onMiddleClicked: root.hostBar.controller.toggleSound()
+
+            MouseTooltip {
+                anchorItem: soundButton
+                shown: soundButton.hovered
+                rows: [
+                    { highlight: "left",   label: "Clic gauche",  value: "Volume -10 %" },
+                    { highlight: "right",  label: "Clic droit",   value: "Volume +10 %" },
+                    { highlight: "middle", label: "Clic molette", value: "Muet / son" }
+                ]
+            }
         }
 
         BarSeparator {}
