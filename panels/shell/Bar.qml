@@ -3,11 +3,11 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 import QtQuick
 import "../../theme"
+import "../../services"
 import "../../panels/services"
 import "../../panels/notifications"
 import "../apps"
 import "../controls"
-import "../controls/ControlCenter/services"
 import "left"
 import "center"
 import "right"

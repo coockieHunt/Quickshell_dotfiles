@@ -2,7 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.UPower
-import "../../../../theme"
+import "../theme"
 
 Item {
     id: root

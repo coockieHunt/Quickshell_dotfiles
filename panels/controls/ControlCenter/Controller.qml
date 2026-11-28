@@ -4,7 +4,7 @@ import Quickshell.Wayland
 import QtQuick
 import "../../../components"
 import "../../../theme"
-import "services"
+import "../../../services"
 
 Scope {
     id: root

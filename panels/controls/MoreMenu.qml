@@ -6,7 +6,7 @@ import Quickshell.Wayland
 import "../../components"
 import "../../components/action"
 import "../../theme"
-import "ControlCenter/services"
+import "../../services"
 import "../services"
 import "../shell"
 
