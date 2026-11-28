@@ -479,14 +479,22 @@ Main application entry point.
 panels/
 ```
 
-Bar,launcher, control center, notifications, performance, wallpaper,
+Bar, launcher, control center, notifications, performance, wallpaper,
 OSD, power, and keyboard-shortcut interfaces.
 
 The files are grouped into `apps/`, `controls/`, `desktop/`, `notifications/`,
-`services/`, and `shell/`. The calendar and weather dropdowns live in `apps/`,
-and the weather data service (`WeatherService.qml`) lives in `services/`.
-The Super key highlight (global shortcut listener) lives in
-`panels/shell/Bar.qml`.
+and `shell/`. The calendar (`Calendar.qml`) and weather dropdowns live in
+`apps/`. `panels/apps/` and `panels/controls/` are imported as modules through
+their `qmldir` files. The Super key highlight (global shortcut listener) lives
+in `panels/shell/Bar.qml`.
+
+```text
+services/
+```
+
+Shared services used across the shell, such as `WeatherService.qml`,
+`PowerService.qml`, `NetworkService.qml` and `PerformanceService.qml`. The
+folder is a QML module with its own `qmldir`.
 
 ```text
 components/

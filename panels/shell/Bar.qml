@@ -126,7 +126,7 @@ Scope {
             LazyLoader {
                 active: panelWindow.calendarOpen
 
-                Calandar {
+                Calendar {
                     anchorItem: clockBlock
                     onClosed: panelWindow.calendarOpen = false
                 }
