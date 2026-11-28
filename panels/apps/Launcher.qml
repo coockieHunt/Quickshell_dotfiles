@@ -66,7 +66,7 @@ PanelWindow {
 
     Loader {
         id: desktopEntryParser
-        source: Qt.resolvedUrl("../../scripts/DesktopEntryParser.qml")
+        source: Qt.resolvedUrl("../../services/DesktopEntryParser.qml")
     }
 
     ModalBackdrop {

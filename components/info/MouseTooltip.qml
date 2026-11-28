@@ -47,23 +47,27 @@ PopupWindow {
             model: root.rows
 
             Row {
+                id: rowItem
                 required property var modelData
+                readonly property string label: modelData.label ?? ""
+                readonly property string value: modelData.value ?? ""
+                readonly property string button: modelData.button ?? ""
                 width: tooltipRows.width
                 spacing: 8
 
                 MouseIcon {
-                    highlight: modelData.button
+                    highlight: rowItem.button
                     anchors.verticalCenter: parent.verticalCenter
                 }
 
                 Column {
-                    width: parent.width - 24 - parent.spacing
+                    width: rowItem.width - 24 - rowItem.spacing
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: 1
 
                     Text {
                         width: parent.width
-                        text: modelData.label
+                        text: rowItem.label
                         color: Theme.text
                         opacity: 0.75
                         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -73,7 +77,7 @@ PopupWindow {
 
                     Text {
                         width: parent.width
-                        text: modelData.value
+                        text: rowItem.value
                         color: Theme.text
                         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                         font.family: Theme.fontFamily
