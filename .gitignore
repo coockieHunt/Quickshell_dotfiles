@@ -10,4 +10,7 @@
 *.log
 
 # Local generated configuration
-config.jsonc
+config/config.jsonc
+
+# Personal custom more menu
+config/CustomMoreMenu.qml

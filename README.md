@@ -28,7 +28,8 @@
     - [Battery charge modes](#battery-charge-modes)
 - [Screenshots](#screenshots)
 - [Configuration](#configuration)
-    - [Weather settings](#weather-1)
+    - [Weather settings](#weather-settings)
+    - [Custom More menu](#custom-more-menu)
 - [TLP profiles, charge limits and Polkit](#tlp-profiles-charge-limits-and-polkit)
 - [Hardware and portability](#hardware-and-portability)
 - [Layout](#layout)
@@ -48,7 +49,7 @@ Then run:
 
 ```sh
 cd ~/.config/quickshell
-cp config.example.jsonc config.jsonc
+cp config/config.example.jsonc config/config.jsonc
 qs -p ~/.config/quickshell
 ```
 
@@ -164,7 +165,7 @@ and the time in the bar. Click them to open the weather dropdown:
 Data comes from [Open-Meteo](https://open-meteo.com), which needs no API key.
 The weather is hidden until the first successful update, and if the network is
 unavailable the last known values stay on screen. See
-[Weather settings](#weather-1) in the configuration section to set your
+[Weather settings](#weather-settings) in the configuration section to set your
 location.
 
 ### Control panel
@@ -212,7 +213,7 @@ the desktop.
 
 ### Application launcher
 
-Configure the web search URL in `config.jsonc` under `launcher.searchUrl`.
+Configure the web search URL in `config/config.jsonc` under `launcher.searchUrl`.
 Use `{query}` where the encoded search terms should appear; the default is
 `https://duckduckgo.com/?q={query}`.
 Press Enter to launch the selected application, or to search the web when no
@@ -227,7 +228,7 @@ to customize launch commands, names, and icons.
 
 ### Keyboard shortcuts
 
-The shortcuts panel reads the keybindings file set in `config.jsonc`:
+The shortcuts panel reads the keybindings file set in `config/config.jsonc`:
 
 ```jsonc
 "keybindings": {
@@ -242,7 +243,7 @@ Annotate bindings with these comments:
 - `-- @ignore` hides the next binding from the panel (useful for media keys,
   volume, brightness, and other bindings that don't need to be displayed).
 
-Changes to the file or to `config.jsonc` are picked up automatically; the
+Changes to the file or to `config/config.jsonc` are picked up automatically; the
 configuration reloads without restarting Quickshell.
 
 ### Super key highlight
@@ -254,7 +255,7 @@ not receive the key press directly.
 
 It takes two parts, and the name used in both must be identical.
 
-**1. Quickshell side** — in `config.jsonc`:
+**1. Quickshell side** — in `config/config.jsonc`:
 
 ```jsonc
 "superHighlight": {
@@ -270,7 +271,7 @@ It takes two parts, and the name used in both must be identical.
 **2. Hyprland side** — in `~/.config/hypr/keybinding.lua`:
 
 ```lua
--- Must be identical to "var" in config.jsonc
+-- Must be identical to "var" in config/config.jsonc
 local superHighlightVar = "superHeld"
 
 -- Press: highlight on
@@ -288,7 +289,7 @@ Notes:
   keyboards. Check yours with `wev` if nothing happens.
 - `transparent = true` lets the key press continue to other bindings, so your
   regular `SUPER + <key>` shortcuts keep working.
-- If you change `var` in `config.jsonc`, change `superHighlightVar` in the Lua
+- If you change `var` in `config/config.jsonc`, change `superHighlightVar` in the Lua
   file too, then reload Hyprland.
 
 ### Power management
@@ -331,8 +332,8 @@ More screenshots (calendar, weather, media controls, shortcuts, power menu) are 
 
 ## Configuration
 
-The main configuration is stored in `config.jsonc`, created from
-[`config.example.jsonc`](./config.example.jsonc). It can be used to change:
+The main configuration is stored in `config/config.jsonc`, created from
+[`config/config.example.jsonc`](./config/config.example.jsonc). It can be used to change:
 
 - Colors
 - Super key highlight (`superHighlight.enabled` and `superHighlight.var`)
@@ -347,15 +348,15 @@ The main configuration is stored in `config.jsonc`, created from
 - Wallpaper palette labels
 - Keybindings file location (`keybindings.file`)
 
-`config.jsonc` is your personal file and is ignored by Git, so your changes
+`config/config.jsonc` is your personal file and is ignored by Git, so your changes
 are never overwritten when you update the repository. Copy
-[`config.example.jsonc`](./config.example.jsonc) to `config.jsonc` on first
-install. After an update, compare your file with `config.example.jsonc`, as new
+[`config/config.example.jsonc`](./config/config.example.jsonc) to `config/config.jsonc` on first
+install. After an update, compare your file with `config/config.example.jsonc`, as new
 options (such as `superHighlight`) must be added by hand to an existing
-`config.jsonc`.
+`config/config.jsonc`.
 
 Set applications in the `apps` category: `wifi`, `bluetooth`, `fileManager`,
-and `textEditor`. The settings button first opens `config.jsonc` with the
+and `textEditor`. The settings button first opens `config/config.jsonc` with the
 system's default application and falls back to `apps.textEditor` if that fails.
 Set bar right-click actions in `panel.wifi.rightClick` and
 `panel.bluetooth.rightClick` to `"toggle"` to enable/disable the connection, or
@@ -382,7 +383,7 @@ Selected wallpapers and generated theme colors are stored under:
 
 ### Weather settings
 
-The weather is configured in the `weather` section of `config.jsonc`:
+The weather is configured in the `weather` section of `config/config.jsonc`:
 
 ```jsonc
 "weather": {
@@ -400,12 +401,20 @@ The weather is configured in the `weather` section of `config.jsonc`:
   is 30.
 
 If the section is missing, the weather uses these defaults (Paris, every 30
-minutes). Changing the coordinates in `config.jsonc` updates the weather
+minutes). Changing the coordinates in `config/config.jsonc` updates the weather
 without restarting Quickshell.
 
 Weather data is provided by [Open-Meteo](https://open-meteo.com). Their free
 service is meant for non-commercial use and asks for attribution, which is why
 the dropdown shows a small "Open-Meteo.com" credit.
+
+### Custom More menu
+
+To customize the More menu, copy `config/CustomMoreMenu.exemple.qml` to
+`config/CustomMoreMenu.qml` and edit the copied file. `config/CustomMoreMenu.qml`
+is ignored by Git, so your personal customization stays local. If
+`config/CustomMoreMenu.qml` does not exist, the custom section is simply
+ignored.
 
 ---
 
@@ -505,10 +514,10 @@ shell.qml
 Main application entry point.
 
 ```text
-config.example.jsonc
+config/config.example.jsonc
 ```
 
-Default configuration template. Copy it to `config.jsonc` (ignored by Git) to
+Default configuration template. Copy it to `config/config.jsonc` (ignored by Git) to
 create your personal configuration.
 
 ```text

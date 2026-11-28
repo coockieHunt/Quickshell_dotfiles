@@ -19,6 +19,31 @@ Item {
 
     required property var hostBar
 
+    readonly property string customPath:
+        Quickshell.env("HOME") + "/.config/quickshell/config/CustomMoreMenu.qml"
+
+    readonly property var customMenu: customLoader.item
+    readonly property var customItems: customMenu ? customMenu.items : []
+
+    Process {
+        id: customExists
+
+        property bool exists: false
+
+        command: ["test", "-f", root.customPath]
+        running: true
+        onExited: (exitCode) => {
+            customExists.exists = exitCode === 0
+        }
+    }
+
+    Loader {
+        id: customLoader
+
+        active: customExists.exists
+        source: customExists.exists ? "file://" + root.customPath : ""
+    }
+
     Macro {
         id: macroLocal
     }
@@ -109,6 +134,11 @@ Item {
             break
         case "full_menu":
             Quickshell.execDetached(["qs", "ipc", "call", "power", "toggle"])
+            break
+        default:
+            const custom = root.customMenu ? root.customMenu.find(action) : null
+            if (custom && custom.command)
+                Quickshell.execDetached(["sh", "-c", custom.command])
             break
         }
 
@@ -203,35 +233,46 @@ Item {
                 spacing: 4
 
                 Repeater {
-                    model: [
-                        {
-                            title: "Applications",
-                            icon: "apps",
-                            items: [
-                                { label: "Lanceur", action: "launcher" },
-                                { label: "Fond d’écran", action: "wallpaper" }
-                            ]
-                        },
-                        {
-                            title: "Connectivité",
-                            icon: "wifi",
-                            items: [
-                                { label: "Wi-Fi", action: "wifi" },
-                                { label: "Bluetooth", action: "bluetooth" }
-                            ]
-                        },
-                        {
-                            title: "Système",
-                            icon: "settings",
-                            items: [
-                                { label: "Audio", action: "audio" },
-                                { label: "Centre de contrôle", action: "control" },
-                                { label: "Macro", action: "macro" },
-                                { label: "Configuration", action: "openSetting" },
-                                { label: "Recharger Qs", action: "reload_qs" }
-                            ]
-                        }
-                    ]
+                    model: {
+                        const categories = [
+                            {
+                                title: "Applications",
+                                icon: "apps",
+                                items: [
+                                    { label: "Lanceur", action: "launcher" },
+                                    { label: "Fond d’écran", action: "wallpaper" }
+                                ]
+                            },
+                            {
+                                title: "Connectivité",
+                                icon: "wifi",
+                                items: [
+                                    { label: "Wi-Fi", action: "wifi" },
+                                    { label: "Bluetooth", action: "bluetooth" }
+                                ]
+                            },
+                            {
+                                title: "Système",
+                                icon: "settings",
+                                items: [
+                                    { label: "Audio", action: "audio" },
+                                    { label: "Centre de contrôle", action: "control" },
+                                    { label: "Macro", action: "macro" },
+                                    { label: "Configuration", action: "openSetting" },
+                                    { label: "Recharger quickshell", action: "reload_qs" }
+                                ]
+                            }
+                        ]
+
+                        if (root.customItems.length > 0)
+                            categories.push({
+                                title: "Custom",
+                                icon: "star",
+                                items: root.customItems
+                            })
+
+                        return categories
+                    }
 
                     delegate: Column {
                         id: category
