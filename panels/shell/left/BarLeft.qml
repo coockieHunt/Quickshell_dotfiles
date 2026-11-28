@@ -4,6 +4,7 @@ import "../../../components"
 import "../../../components/action"
 import "../../../theme"
 import "../../../components/info"
+import "../../../components/tooltip"
 import "services"
 
 BarBlock {

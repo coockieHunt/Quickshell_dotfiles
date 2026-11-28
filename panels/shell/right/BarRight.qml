@@ -3,6 +3,7 @@ import Quickshell.Services.UPower
 import "../../../components"
 import "../../../components/action"
 import "../../../components/info"
+import "../../../components/tooltip"
 import "../../../theme"
 import "../../controls"
 

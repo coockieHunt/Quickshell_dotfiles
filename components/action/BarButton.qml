@@ -1,5 +1,6 @@
 import QtQuick
 import "../info"
+import "../tooltip"
 import "../../theme"
 
 Rectangle {
