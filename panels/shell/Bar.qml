@@ -4,7 +4,6 @@ import Quickshell.Hyprland
 import QtQuick
 import "../../theme"
 import "../../services"
-import "../../services"
 import "../../panels/notifications"
 import "../apps"
 import "../controls"
