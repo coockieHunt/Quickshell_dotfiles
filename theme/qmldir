@@ -1,0 +1,4 @@
+singleton Theme 1.0 Theme.qml
+JsoncParser 1.0 JsoncParser.qml
+ThemeValidator 1.0 ThemeValidator.qml
+ConfigValidator 1.0 ConfigValidator.qml

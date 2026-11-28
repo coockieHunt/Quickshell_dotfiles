@@ -136,9 +136,8 @@ Item {
             Quickshell.execDetached(["qs", "ipc", "call", "power", "toggle"])
             break
         default:
-            const custom = root.customMenu ? root.customMenu.find(action) : null
-            if (custom && custom.command)
-                Quickshell.execDetached(["sh", "-c", custom.command])
+            if (root.customMenu)
+                root.customMenu.request(action)
             break
         }
 
