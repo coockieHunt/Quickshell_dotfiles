@@ -68,7 +68,7 @@ Singleton {
     property string fileManagerApplication: "dolphin"
     property string textEditorApplication: "kate"
 
-    readonly property string configFilePath: Quickshell.env("HOME") + "/.config/quickshell/config.jsonc"
+    readonly property string configFilePath: Quickshell.env("HOME") + "/.config/quickshell/config/config.jsonc"
     readonly property string scriptsDir: Quickshell.env("HOME") + "/.config/quickshell/scripts"
     readonly property string powerProfileScript: scriptsDir + "/tlp-power-profile.sh"
     readonly property string wallpaperScript: scriptsDir + "/wallpaper-apply.sh"

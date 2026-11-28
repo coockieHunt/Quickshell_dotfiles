@@ -1,84 +1,82 @@
 import QtQuick
 
 QtObject {
+    function stripComments(s) {
+        let out = ""
+        let inString = false
+        let escaped = false
+
+        for (let i = 0; i < s.length; i++) {
+            const c = s[i]
+            const n = s[i + 1]
+
+            if (inString) {
+                out += c
+                if (escaped) escaped = false
+                else if (c === "\\") escaped = true
+                else if (c === '"') inString = false
+                continue
+            }
+
+            if (c === '"') {
+                inString = true
+                out += c
+                continue
+            }
+
+            if (c === "/" && n === "/") {
+                while (i < s.length && s[i] !== "\n") i++
+                out += "\n"
+                continue
+            }
+
+            if (c === "/" && n === "*") {
+                i += 2
+                while (i < s.length && !(s[i] === "*" && s[i + 1] === "/")) i++
+                i++
+                continue
+            }
+
+            out += c
+        }
+        return out
+    }
+
+    function removeTrailingCommas(s) {
+        let out = ""
+        let inString = false
+        let escaped = false
+
+        for (let i = 0; i < s.length; i++) {
+            const c = s[i]
+
+            if (inString) {
+                out += c
+                if (escaped) escaped = false
+                else if (c === "\\") escaped = true
+                else if (c === '"') inString = false
+                continue
+            }
+
+            if (c === '"') {
+                inString = true
+                out += c
+                continue
+            }
+
+            if (c === ",") {
+                let j = i + 1
+                while (j < s.length && /\s/.test(s[j])) j++
+                if (s[j] === "}" || s[j] === "]")
+                    continue
+            }
+
+            out += c
+        }
+        return out
+    }
+
     function parse(source) {
-        let uncommented = ""
-        let inString = false
-        let escaped = false
-
-        for (let i = 0; i < source.length; i++) {
-            const char = source[i]
-            const next = source[i + 1]
-
-            if (inString) {
-                uncommented += char
-                if (escaped)
-                    escaped = false
-                else if (char === "\\")
-                    escaped = true
-                else if (char === '"')
-                    inString = false
-            } else {
-                if (char === '"')
-                    inString = true
-                else if (char === "/" && next === "/")
-                    break
-                else if (char === "/" && next === "*") {
-                    const end = source.indexOf("*/", i + 2)
-                    if (end === -1)
-                        break
-                    i = end + 1
-                } else
-                    uncommented += char
-            }
-        }
-
-        return JSON.parse(normalizeTrailingCommas(uncommented))
-    }
-
-    function normalizeTrailingCommas(source) {
-        let normalized = ""
-        let inString = false
-        let escaped = false
-
-        for (let i = 0; i < source.length; i++) {
-            const char = source[i]
-
-            if (inString) {
-                normalized += char
-                if (escaped)
-                    escaped = false
-                else if (char === "\\")
-                    escaped = true
-                else if (char === '"')
-                    inString = false
-            } else {
-                if (char === '"')
-                    inString = true
-
-                if (char === "," || char === "{" || char === "[") {
-                    normalized += char
-                } else {
-                    const trimmed = normalizedTrimEnd(normalized)
-                    const last = trimmed[trimmed.length - 1]
-                    if (char === "}" || char === "]") {
-                        if (last === ",")
-                            normalized = trimmed
-                        normalized += char
-                    } else {
-                        normalized += char
-                    }
-                }
-            }
-        }
-
-        return normalized
-    }
-
-    function normalizedTrimEnd(str) {
-        let end = str.length
-        while (end > 0 && /\s/.test(str[end - 1]))
-            end--
-        return str.slice(0, end)
+        return JSON.parse(removeTrailingCommas(stripComments(source)))
     }
 }
