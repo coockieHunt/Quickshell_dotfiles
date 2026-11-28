@@ -6,6 +6,10 @@ import QtQuick
 Singleton {
     id: root
 
+    JsoncParser { id: jsoncParser }
+    ThemeValidator { id: themeValidator }
+    ConfigValidator { id: configValidator }
+
     property bool themeReady: false
     property bool splashDone: false
     property bool minTimeElapsed: false
@@ -24,7 +28,6 @@ Singleton {
 
     property bool superHighlightEnabled: true
     property string superHighlightVar: "superHeld"
-
 
     readonly property color componentBackground: root.bg
     readonly property color componentSurface: root.surface
@@ -130,20 +133,7 @@ Singleton {
     }
 
     function isValidTheme(theme) {
-        const keys = [
-            "bg",
-            "surface",
-            "text",
-            "accent",
-            "textOnAccent",
-            "buttonHover"
-        ]
-
-        return theme
-            && keys.every(key =>
-                typeof theme[key] === "string"
-                && /^#?[0-9a-fA-F]{6}$/.test(theme[key])
-            )
+        return themeValidator.isValidTheme(theme)
     }
 
     function applyThemeColors(theme) {
@@ -155,12 +145,7 @@ Singleton {
         }
 
         const bgColor = Qt.color(theme.bg)
-        root.bg = Qt.rgba(
-            bgColor.r,
-            bgColor.g,
-            bgColor.b,
-            root.backgroundOpacity
-        )
+        root.bg = Qt.rgba(bgColor.r, bgColor.g, bgColor.b, root.backgroundOpacity)
         root.surface = theme.surface
         root.text = theme.text
         root.accent = theme.accent
@@ -179,103 +164,103 @@ Singleton {
         return true
     }
 
-    function parseJsonc(source) {
-        let uncommented = ""
-        let inString = false
-        let escaped = false
+    function applyConfig(config, c) {
+        const ui = config.ui
+        const controlPanel = config.controlPanel
+        const performance = config.performance
+        const powerProfile = config.powerProfile
+        const panel = config.panel || config.bar
+        const wifiPanel = panel?.wifi
+        const bluetoothPanel = panel?.bluetooth
+        const apps = config.apps
+        const launcher = config.launcher
+        const watchers = config.watchers
+        const fonts = config.fonts
+        const superCfg = config.superHighlight
 
-        for (let i = 0; i < source.length; i++) {
-            const char = source[i]
-            const next = source[i + 1]
+        if (!root.themeReady)
+            root.applyThemeColors(c)
 
-            if (inString) {
-                uncommented += char
+        root.cornerRadius = ui.cornerRadius
+        root.accentBorders = ui.accentBorders
 
-                if (escaped)
-                    escaped = false
-                else if (char === "\\")
-                    escaped = true
-                else if (char === "\"")
-                    inString = false
+        root.performanceStatsRefreshSeconds = performance.statsRefreshSeconds
+        root.performanceProcessRefreshSeconds = performance.processRefreshSeconds
+        root.performanceTemperatureRefreshSeconds =
+            performance.temperatureRefreshSeconds
 
-                continue
-            }
+        root.batteryPerformanceFallbackEnabled =
+            powerProfile.batteryFallbackEnabled
+        root.batteryPerformanceFallbackThresholdPercent =
+            powerProfile.batteryFallbackThresholdPercent
+        root.batteryFallbackProfile = powerProfile.batteryFallbackProfile
+        root.tlpChargeModes = powerProfile.tlpChargeModes || root.tlpChargeModes
+        root.reduceBrightnessInEco = powerProfile.reduceBrightnessInEco
 
-            if (char === "\"") {
-                inString = true
-                uncommented += char
-            } else if (char === "/" && next === "/") {
-                while (i < source.length && source[i] !== "\n")
-                    i++
+        root.controlPanelDefaultMode = controlPanel.defaultMode
 
-                if (i < source.length)
-                    uncommented += "\n"
-            } else if (char === "/" && next === "*") {
-                i += 2
+        if (launcher)
+            root.launcherSearchUrl = launcher.searchUrl
 
-                while (
-                    i < source.length
-                    && !(source[i] === "*" && source[i + 1] === "/")
-                ) {
-                    if (source[i] === "\n")
-                        uncommented += "\n"
-                    i++
-                }
-
-                if (i >= source.length)
-                    throw new Error("Unterminated block comment")
-
-                i++
-            } else {
-                uncommented += char
-            }
+        root.weather = config.weather || {
+            enabled: true,
+            latitude: 48.8566,
+            longitude: 2.3522,
+            refreshMinutes: 30
         }
 
-        let normalized = ""
-        inString = false
-        escaped = false
-
-        for (let i = 0; i < uncommented.length; i++) {
-            const char = uncommented[i]
-
-            if (inString) {
-                normalized += char
-
-                if (escaped)
-                    escaped = false
-                else if (char === "\\")
-                    escaped = true
-                else if (char === "\"")
-                    inString = false
-
-                continue
-            }
-
-            if (char === "\"") {
-                inString = true
-                normalized += char
-            } else if (char === ",") {
-                let next = i + 1
-
-                while (
-                    next < uncommented.length
-                    && /\s/.test(uncommented[next])
-                ) {
-                    next++
-                }
-
-                if (
-                    uncommented[next] !== "}"
-                    && uncommented[next] !== "]"
-                ) {
-                    normalized += char
-                }
-            } else {
-                normalized += char
-            }
+        if (watchers) {
+            root.soundDir = watchers.soundDir.startsWith("~/")
+                ? Quickshell.env("HOME") + watchers.soundDir.slice(1)
+                : watchers.soundDir
+            root.soundExt = watchers.soundExt.replace(/^\./, "")
+            root.sounds = watchers.sounds
         }
 
-        return JSON.parse(normalized)
+        root.wifiApplication =
+            apps?.wifi || wifiPanel?.application || "nm-connection-editor"
+        root.barWifiRightClick = wifiPanel?.rightClick || "toggle"
+
+        root.bluetoothApplication =
+            apps?.bluetooth || bluetoothPanel?.application || "blueman-manager"
+        root.barBluetoothRightClick =
+            bluetoothPanel?.rightClick || "toggle"
+
+        root.fileManagerApplication = apps?.fileManager || "dolphin"
+        root.textEditorApplication = apps?.textEditor || "kate"
+
+        const wallpaperDirectory =
+            config.wallpaper?.directory || "~/Pictures/wallpapers"
+        root.wallpaperDir = wallpaperDirectory.startsWith("~/")
+            ? Quickshell.env("HOME") + wallpaperDirectory.slice(1)
+            : wallpaperDirectory
+
+        const keybindingPath =
+            config.keybindings?.file || "~/.config/hypr/keybinding.lua"
+        root.keybindingFile = keybindingPath.startsWith("~/")
+            ? Quickshell.env("HOME") + keybindingPath.slice(1)
+            : keybindingPath
+
+        root.ecoSettings = config.eco
+        root.wallpaperPaletteLabels = config.wallpaperPaletteLabels
+
+        root.fontFamily = fonts?.text || "sans-serif"
+        root.monoFont = fonts?.mono || "monospace"
+        root.iconFont = fonts?.icons || "Material Symbols Rounded"
+        root.brandFont = fonts?.brand || "JetBrainsMono Nerd Font"
+        root.archLogo = fonts?.logo || "\uf303"
+        root.fontSize = fonts?.textSize || 13
+        root.iconSize = fonts?.iconSize || 16
+
+        root.superHighlightEnabled =
+            typeof superCfg?.enabled === "boolean" ? superCfg.enabled : true
+        root.superHighlightVar =
+            (typeof superCfg?.var === "string"
+                && /^[A-Za-z0-9_]+$/.test(superCfg.var))
+                ? superCfg.var
+                : "superHeld"
+
+        root.configRevision++
     }
 
     FileView {
@@ -287,278 +272,22 @@ Singleton {
 
         onLoaded: {
             try {
-                const config = root.parseJsonc(text())
+                const config = jsoncParser.parse(text())
                 const c = config.theme
 
-                if (!root.isValidTheme(c)) {
+                if (!themeValidator.isValidTheme(c)) {
                     console.warn("config.jsonc: thème absent ou invalide")
                     return
                 }
 
-                const ui = config.ui
-                const controlPanel = config.controlPanel
-                const performance = config.performance
-                const powerProfile = config.powerProfile
-                const wallpaperConfig = config.wallpaper
-                const keybindingsConfig = config.keybindings
-                const updates = config.updates
-                const launcher = config.launcher
-                const weatherConfig = config.weather
-                const watchers = config.watchers
-                const panel = config.panel || config.bar
-                const wifiPanel = panel?.wifi
-                const bluetoothPanel = panel?.bluetooth
-                const apps = config.apps
-                const tlpChargeModes =
-                    powerProfile?.tlpChargeModes || root.tlpChargeModes
-                const eco = config.eco
-                const fonts = config.fonts
-                const labels = config.wallpaperPaletteLabels
-
-                const labelKeys = [
-                    "background",
-                    "surface",
-                    "primary",
-                    "secondary",
-                    "tertiary"
-                ]
-                const ecoKeys = [
-                    "ecoVolume",
-                    "ecoBrightness",
-                    "normalVolume",
-                    "normalBrightness"
-                ]
-                const fontKeys = [
-                    "text",
-                    "mono",
-                    "icons",
-                    "brand",
-                    "logo"
-                ]
-
-                if (
-                    !ui
-                    || !Number.isFinite(ui.cornerRadius)
-                    || ui.cornerRadius < 0
-                    || ui.cornerRadius > 8
-                    || typeof ui.accentBorders !== "boolean"
-                    || !controlPanel
-                    || !["notifications", "both"].includes(controlPanel.defaultMode)
-                    || (launcher && (
-                        typeof launcher.searchUrl !== "string"
-                        || !/^https?:\/\/\S*\{query\}\S*$/i.test(launcher.searchUrl)
-                    ))
-                    || (weatherConfig && (
-                        typeof weatherConfig.enabled !== "boolean"
-                        || !Number.isFinite(weatherConfig.latitude)
-                        || weatherConfig.latitude < -90
-                        || weatherConfig.latitude > 90
-                        || !Number.isFinite(weatherConfig.longitude)
-                        || weatherConfig.longitude < -180
-                        || weatherConfig.longitude > 180
-                        || !Number.isInteger(weatherConfig.refreshMinutes)
-                        || weatherConfig.refreshMinutes < 1
-                    ))
-                    || (watchers && (
-                        typeof watchers.soundDir !== "string"
-                        || watchers.soundDir.trim() === ""
-                        || typeof watchers.soundExt !== "string"
-                        || !watchers.sounds
-                        || typeof watchers.sounds !== "object"
-                        || !Object.keys(watchers.sounds).every(
-                            key => typeof watchers.sounds[key] === "string"
-                        )
-                    ))
-                    || (panel && (
-                        !wifiPanel
-                        || !bluetoothPanel
-                        || (
-                            wifiPanel.rightClick !== undefined
-                            && !["toggle", "none"].includes(wifiPanel.rightClick)
-                        )
-                        || (
-                            bluetoothPanel.rightClick !== undefined
-                            && !["toggle", "none"].includes(bluetoothPanel.rightClick)
-                        )
-                    ))
-                    || (apps && !["wifi", "bluetooth", "fileManager"].every(
-                        key =>
-                            typeof apps[key] === "string"
-                            && apps[key].trim() !== ""
-                    ))
-                    || (wallpaperConfig && (
-                        typeof wallpaperConfig.directory !== "string"
-                        || wallpaperConfig.directory.trim() === ""
-                        || (
-                            !wallpaperConfig.directory.startsWith("/")
-                            && !wallpaperConfig.directory.startsWith("~/")
-                        )
-                    ))
-                    || (keybindingsConfig && (
-                        typeof keybindingsConfig.file !== "string"
-                        || keybindingsConfig.file.trim() === ""
-                        || (
-                            !keybindingsConfig.file.startsWith("/")
-                            && !keybindingsConfig.file.startsWith("~/")
-                        )
-                    ))
-                    || !performance
-                    || !powerProfile
-                    || typeof powerProfile.batteryFallbackEnabled !== "boolean"
-                    || !Number.isInteger(powerProfile.batteryFallbackThresholdPercent)
-                    || powerProfile.batteryFallbackThresholdPercent < 1
-                    || powerProfile.batteryFallbackThresholdPercent > 100
-                    || !["eco", "balanced"].includes(powerProfile.batteryFallbackProfile)
-                    || typeof powerProfile.reduceBrightnessInEco !== "boolean"
-                    || !tlpChargeModes
-                    || !["deplacement", "safe"].every(mode => {
-                        const limits = tlpChargeModes[mode]
-
-                        return limits
-                            && Number.isInteger(limits.start)
-                            && limits.start >= 0
-                            && limits.start < 100
-                            && Number.isInteger(limits.stop)
-                            && limits.stop > limits.start
-                            && limits.stop <= 100
-                    })
-                    || !Number.isInteger(performance.statsRefreshSeconds)
-                    || performance.statsRefreshSeconds < 1
-                    || performance.statsRefreshSeconds > 60
-                    || !Number.isInteger(performance.processRefreshSeconds)
-                    || performance.processRefreshSeconds < 5
-                    || performance.processRefreshSeconds > 300
-                    || !Number.isInteger(performance.temperatureRefreshSeconds)
-                    || performance.temperatureRefreshSeconds < 5
-                    || performance.temperatureRefreshSeconds > 300
-                    || !eco
-                    || !ecoKeys.every(
-                        key =>
-                            Number.isFinite(eco[key])
-                            && eco[key] >= 0
-                            && eco[key] <= 100
-                    )
-                    || (fonts && !fontKeys.every(
-                        key =>
-                            fonts[key] === undefined
-                            || (
-                                typeof fonts[key] === "string"
-                                && fonts[key].trim() !== ""
-                            )
-                    ))
-                    || (fonts && fonts.textSize !== undefined && (
-                        !Number.isInteger(fonts.textSize)
-                        || fonts.textSize < 8
-                        || fonts.textSize > 32
-                    ))
-                    || (fonts && fonts.iconSize !== undefined && (
-                        !Number.isInteger(fonts.iconSize)
-                        || fonts.iconSize < 8
-                        || fonts.iconSize > 48
-                    ))
-                    || !labels
-                    || !labelKeys.every(
-                        key =>
-                            typeof labels[key] === "string"
-                            && labels[key].trim() !== ""
-                    )
-                ) {
+                if (!configValidator.validate(config, root)) {
                     console.warn(
                         "config.jsonc: invalid or missing configuration values"
                     )
                     return
                 }
 
-                if (!root.themeReady)
-                    root.applyThemeColors(c)
-
-                root.cornerRadius = ui.cornerRadius
-                root.accentBorders = ui.accentBorders
-
-                root.performanceStatsRefreshSeconds =
-                    performance.statsRefreshSeconds
-                root.performanceProcessRefreshSeconds =
-                    performance.processRefreshSeconds
-                root.performanceTemperatureRefreshSeconds =
-                    performance.temperatureRefreshSeconds
-
-                root.batteryPerformanceFallbackEnabled =
-                    powerProfile.batteryFallbackEnabled
-                root.batteryPerformanceFallbackThresholdPercent =
-                    powerProfile.batteryFallbackThresholdPercent
-                root.batteryFallbackProfile =
-                    powerProfile.batteryFallbackProfile
-                root.tlpChargeModes = tlpChargeModes
-                root.reduceBrightnessInEco =
-                    powerProfile.reduceBrightnessInEco
-
-                root.controlPanelDefaultMode = controlPanel.defaultMode
-
-                if (launcher)
-                    root.launcherSearchUrl = launcher.searchUrl
-
-                root.weather = weatherConfig || {
-                    enabled: true,
-                    latitude: 48.8566,
-                    longitude: 2.3522,
-                    refreshMinutes: 30
-                }
-
-                if (watchers) {
-                    root.soundDir = watchers.soundDir.startsWith("~/")
-                        ? Quickshell.env("HOME") + watchers.soundDir.slice(1)
-                        : watchers.soundDir
-                    root.soundExt = watchers.soundExt.replace(/^\./, "")
-                    root.sounds = watchers.sounds
-                }
-
-                root.wifiApplication =
-                    apps?.wifi || wifiPanel?.application || "nm-connection-editor"
-                root.barWifiRightClick = wifiPanel?.rightClick || "toggle"
-
-                root.bluetoothApplication =
-                    apps?.bluetooth || bluetoothPanel?.application || "blueman-manager"
-                root.barBluetoothRightClick =
-                    bluetoothPanel?.rightClick || "toggle"
-
-                root.fileManagerApplication =
-                    apps?.fileManager || "dolphin"
-                root.textEditorApplication =
-                    apps?.textEditor || "kate"
-
-                const wallpaperDirectory =
-                    wallpaperConfig?.directory || "~/Pictures/wallpapers"
-                root.wallpaperDir = wallpaperDirectory.startsWith("~/")
-                    ? Quickshell.env("HOME") + wallpaperDirectory.slice(1)
-                    : wallpaperDirectory
-
-                const keybindingPath =
-                    keybindingsConfig?.file || "~/.config/hypr/keybinding.lua"
-                root.keybindingFile = keybindingPath.startsWith("~/")
-                    ? Quickshell.env("HOME") + keybindingPath.slice(1)
-                    : keybindingPath
-
-                root.ecoSettings = eco
-                root.wallpaperPaletteLabels = labels
-
-                root.fontFamily = fonts?.text || "sans-serif"
-                root.monoFont = fonts?.mono || "monospace"
-                root.iconFont = fonts?.icons || "Material Symbols Rounded"
-                root.brandFont = fonts?.brand || "JetBrainsMono Nerd Font"
-                root.archLogo = fonts?.logo || "\uf303"
-                root.fontSize = fonts?.textSize || 13
-                root.iconSize = fonts?.iconSize || 16
-
-                const superCfg = config.superHighlight
-                root.superHighlightEnabled =
-                    typeof superCfg?.enabled === "boolean" ? superCfg.enabled : true
-                root.superHighlightVar =
-                    (typeof superCfg?.var === "string" && /^[A-Za-z0-9_]+$/.test(superCfg.var))
-                        ? superCfg.var
-                        : "superHeld"
-
-
-                root.configRevision++
+                root.applyConfig(config, c)
             } catch (error) {
                 console.warn("Failed to load config.jsonc:", error)
             }
