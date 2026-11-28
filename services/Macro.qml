@@ -2,9 +2,9 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import QtQuick
-import "../../components"
-import "../../components/action"
-import "../../theme"
+import "../components"
+import "../components/action"
+import "../theme"
 
 Scope {
     id: root
@@ -38,7 +38,7 @@ Scope {
 
     Loader {
         id: keybindingParser
-        source: Qt.resolvedUrl("../../scripts/KeybindingParser.qml")
+        source: Qt.resolvedUrl("../scripts/KeybindingParser.qml")
         onLoaded: root.updateKeybindings(root.keybindingContents)
     }
 

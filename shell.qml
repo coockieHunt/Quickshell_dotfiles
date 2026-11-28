@@ -6,7 +6,7 @@ import "panels/controls/ControlCenter"
 //import "panels/controls/Bar"
 import "panels/desktop"
 import "panels/notifications"
-import "panels/services"
+import "services"
 import "panels/shell"
 
 

@@ -7,7 +7,7 @@ import "../../components"
 import "../../components/action"
 import "../../theme"
 import "../../services"
-import "../services"
+import "../../services"
 import "../shell"
 
 Item {
