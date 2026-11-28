@@ -1,15 +1,3 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
-script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-config_file="$script_dir/config.jsonc"
-
-if [[ -e "$config_file" ]]; then
-    printf 'Keeping existing %s\n' "$config_file"
-    exit 0
-fi
-
-if ! (set -o noclobber; cat > "$config_file" <<'EOF'
 {
     // Defines the main interface colors.
     "theme": {
@@ -42,8 +30,8 @@ if ! (set -o noclobber; cat > "$config_file" <<'EOF'
             "unplug": "power-unplug",
             "batteryLow": "battery-low",
             "usbAdd": "device-added",
-            "usbRemove": "device-removed"
-        }
+            "usbRemove": "device-removed",
+        },
     },
 
     // Defines global fonts and sizes.
@@ -146,15 +134,3 @@ if ! (set -o noclobber; cat > "$config_file" <<'EOF'
         "tertiary": "Tertiaire",
     },
 }
-EOF
-); then
-    if [[ -e "$config_file" ]]; then
-        printf 'Keeping existing %s\n' "$config_file"
-        exit 0
-    fi
-
-    printf 'Could not create %s\n' "$config_file" >&2
-    exit 1
-fi
-
-printf 'Created %s\n' "$config_file"

@@ -10,6 +10,123 @@
 >
 > In short: it works on my machine. From there, Linux may have its own ideas.
 
+## Table of contents
+
+- [Install and run](#install-and-run)
+- [Requirements](#requirements)
+- [Features](#features)
+    - [Top bar](#top-bar)
+    - [Calendar](#calendar)
+    - [Weather](#weather)
+    - [Control panel](#control-panel)
+    - [Wallpaper tools](#wallpaper-tools)
+    - [Other panels](#other-panels)
+    - [Application launcher](#application-launcher)
+    - [Keyboard shortcuts](#keyboard-shortcuts)
+    - [Super key highlight](#super-key-highlight)
+    - [Power management](#power-management)
+    - [Battery charge modes](#battery-charge-modes)
+- [Screenshots](#screenshots)
+- [Configuration](#configuration)
+    - [Weather settings](#weather-1)
+- [TLP profiles, charge limits and Polkit](#tlp-profiles-charge-limits-and-polkit)
+- [Hardware and portability](#hardware-and-portability)
+- [Layout](#layout)
+- [About the project](#about-the-project)
+
+---
+
+## Install and run
+
+Place this directory at:
+
+```text
+~/.config/quickshell
+```
+
+Then run:
+
+```sh
+cd ~/.config/quickshell
+cp config.example.jsonc config.jsonc
+qs -p ~/.config/quickshell
+```
+
+The shell is designed to run inside a Hyprland session.
+
+Some commands use Hyprland IPC and will therefore require adjustments when
+used with another compositor.
+
+To use the [Super key highlight](#super-key-highlight), also add the two
+`hl.bind(...)` lines to your Hyprland keybinding file.
+
+---
+
+## Requirements
+
+The setup requires:
+
+- Linux with **Wayland**
+- **Hyprland**
+- **Quickshell**
+- The Quickshell modules used by this configuration:
+    - Wayland
+    - Hyprland
+    - UPower
+    - MPRIS
+    - PipeWire
+    - Notifications
+
+Common utilities:
+
+- `bash`
+- `curl`
+- `cat`
+- `ps`
+- `nmcli`
+- `bluetoothctl`
+- `wpctl`
+- `brightnessctl`
+- `notify-send`
+- `systemctl`
+- `hyprctl`
+- `hyprlock`
+
+For power management:
+
+- **TLP**
+- A running **Polkit authentication agent**
+
+For wallpaper colors:
+
+- **Matugen**
+
+For the weather:
+
+- Internet access (the forecast comes from Open-Meteo, no account or API key
+  needed)
+- The **Material Symbols** icon font, which also provides the weather icons
+
+Optional integrations:
+
+- `pavucontrol`
+- `nm-connection-editor`
+- `xdg-open`
+- `hyprshutdown`
+- `wev` (to find the keycode of your Super key)
+- [Thyx](https://github.com/rccyx/thyx), an SDDM login theme (not a session lock screen)
+
+A wallpaper collection is expected in:
+
+```text
+~/Pictures/wallpapers
+```
+
+Some system readings rely on Linux `/proc` and `/sys` interfaces being
+available.
+
+---
+
 ## Features
 
 ### Top bar
@@ -47,7 +164,8 @@ and the time in the bar. Click them to open the weather dropdown:
 Data comes from [Open-Meteo](https://open-meteo.com), which needs no API key.
 The weather is hidden until the first successful update, and if the network is
 unavailable the last known values stay on screen. See
-[Weather](#weather-1) in the configuration section to set your location.
+[Weather settings](#weather-1) in the configuration section to set your
+location.
 
 ### Control panel
 
@@ -211,101 +329,10 @@ More screenshots (calendar, weather, media controls, shortcuts, power menu) are 
 
 ---
 
-## Requirements
-
-The setup requires:
-
-- Linux with **Wayland**
-- **Hyprland**
-- **Quickshell**
-- The Quickshell modules used by this configuration:
-    - Wayland
-    - Hyprland
-    - UPower
-    - MPRIS
-    - PipeWire
-    - Notifications
-
-Common utilities:
-
-- `bash`
-- `curl`
-- `cat`
-- `ps`
-- `nmcli`
-- `bluetoothctl`
-- `wpctl`
-- `brightnessctl`
-- `notify-send`
-- `systemctl`
-- `hyprctl`
-- `hyprlock`
-
-For power management:
-
-- **TLP**
-- A running **Polkit authentication agent**
-
-For wallpaper colors:
-
-- **Matugen**
-
-For the weather:
-
-- Internet access (the forecast comes from Open-Meteo, no account or API key
-  needed)
-- The **Material Symbols** icon font, which also provides the weather icons
-
-Optional integrations:
-
-- `pavucontrol`
-- `nm-connection-editor`
-- `xdg-open`
-- `hyprshutdown`
-- `wev` (to find the keycode of your Super key)
-- [Thyx](https://github.com/rccyx/thyx), an SDDM login theme (not a session lock screen)
-
-A wallpaper collection is expected in:
-
-```text
-~/Pictures/wallpapers
-```
-
-Some system readings rely on Linux `/proc` and `/sys` interfaces being
-available.
-
----
-
-## Install and run
-
-Place this directory at:
-
-```text
-~/.config/quickshell
-```
-
-Then run:
-
-```sh
-cd ~/.config/quickshell
-./setup-config.sh
-qs -p ~/.config/quickshell
-```
-
-The shell is designed to run inside a Hyprland session.
-
-Some commands use Hyprland IPC and will therefore require adjustments when
-used with another compositor.
-
-To use the [Super key highlight](#super-key-highlight), also add the two
-`hl.bind(...)` lines to your Hyprland keybinding file.
-
----
-
 ## Configuration
 
-The main configuration is stored in [`config.jsonc`](./config.jsonc). It can
-be used to change:
+The main configuration is stored in `config.jsonc`, created from
+[`config.example.jsonc`](./config.example.jsonc). It can be used to change:
 
 - Colors
 - Super key highlight (`superHighlight.enabled` and `superHighlight.var`)
@@ -320,10 +347,12 @@ be used to change:
 - Wallpaper palette labels
 - Keybindings file location (`keybindings.file`)
 
-[`setup-config.sh`](./setup-config.sh) creates a default `config.jsonc` if
-one does not already exist. If the file already exists, it leaves it untouched,
-so new options (such as `superHighlight`) must be added by hand to an existing
-file.
+`config.jsonc` is your personal file and is ignored by Git, so your changes
+are never overwritten when you update the repository. Copy
+[`config.example.jsonc`](./config.example.jsonc) to `config.jsonc` on first
+install. After an update, compare your file with `config.example.jsonc`, as new
+options (such as `superHighlight`) must be added by hand to an existing
+`config.jsonc`.
 
 Set applications in the `apps` category: `wifi`, `bluetooth`, `fileManager`,
 and `textEditor`. The settings button first opens `config.jsonc` with the
@@ -351,7 +380,7 @@ Selected wallpapers and generated theme colors are stored under:
 ~/.cache
 ```
 
-### Weather
+### Weather settings
 
 The weather is configured in the `weather` section of `config.jsonc`:
 
@@ -474,6 +503,13 @@ shell.qml
 ```
 
 Main application entry point.
+
+```text
+config.example.jsonc
+```
+
+Default configuration template. Copy it to `config.jsonc` (ignored by Git) to
+create your personal configuration.
 
 ```text
 panels/
