@@ -7,7 +7,6 @@ import "../../components"
 import "../../components/action"
 import "../../theme"
 import "../../services"
-import "../shell"
 
 Item {
     id: root

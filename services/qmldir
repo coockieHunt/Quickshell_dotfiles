@@ -1,0 +1,10 @@
+AudioService 1.0 AudioService.qml
+BrightnessService 1.0 BrightnessService.qml
+DesktopEntryParser 1.0 DesktopEntryParser.qml
+KeybindingParser 1.0 KeybindingParser.qml
+Macro 1.0 Macro.qml
+NetworkService 1.0 NetworkService.qml
+PerformanceService 1.0 PerformanceService.qml
+PowerService 1.0 PowerService.qml
+Watchers 1.0 Watchers.qml
+WeatherService 1.0 WeatherService.qml

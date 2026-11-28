@@ -4,7 +4,7 @@ import Quickshell.Hyprland
 import QtQuick
 import "../../theme"
 import "../../services"
-import "../../panels/notifications"
+import "../notifications"
 import "../apps"
 import "../controls"
 import "left"
@@ -18,7 +18,6 @@ Scope {
     required property var wallpaperPicker
     required property var controller
     required property var notificationController
-    property var performanceSource: performance
     property bool superHeld: false
     signal hideRequested()
 
@@ -47,6 +46,8 @@ Scope {
     PerformanceService {
         id: performance
     }
+
+    property var performanceSource: performance
 
     Variants {
         model: Quickshell.screens
